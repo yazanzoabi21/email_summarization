@@ -1,0 +1,39 @@
+<nav class="navbar bg-white shadow-sm px-3 py-2 d-flex align-items-center justify-content-between">
+  <!-- Left: Hamburger + Logo -->
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-light" (click)="toggleSidebar()" title="Toggle sidebar">
+      <i class="fa fa-bars fs-4"></i>
+    </button>
+
+    <a routerLink="/" class="d-flex align-items-center gap-2 text-decoration-none">
+      <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png" height="28" alt="Gmail logo" />
+    </a>
+  </div>
+
+  <!-- Center: Search -->
+  <div class="input-group w-50 bg-light rounded-pill">
+    <span class="input-group-text border-0 bg-transparent">
+      <i class="fa fa-search"></i>
+    </span>
+    <input type="text" class="form-control border-0 bg-transparent" placeholder="Search mail">
+    <span class="input-group-text border-0 bg-transparent">
+      <i class="fa fa-sliders"></i>
+    </span>
+  </div>
+
+  <!-- Right: Icons + Avatar -->
+  <div class="d-flex align-items-center gap-3">
+    <div class="icon-circle-hover" title="Help">
+      <i class="fa fa-question-circle"></i>
+    </div>
+    <div class="icon-circle-hover" title="Settings">
+      <i class="fa fa-cog"></i>
+    </div>
+    <div class="icon-circle-hover" title="Google Apps">
+      <i class="fa fa-th"></i>
+    </div>
+    <div class="rounded-circle bg-teal text-white d-flex justify-content-center align-items-center" style="width: 32px; height: 32px; font-weight: bold; cursor: pointer;">
+      Z
+    </div>
+  </div>    
+</nav>  

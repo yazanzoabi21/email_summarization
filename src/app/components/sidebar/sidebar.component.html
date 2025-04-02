@@ -1,0 +1,43 @@
+<div class="bg-light vh-100 p-3 shadow-sm" [ngStyle]="{ width: isCollapsed ? '80px' : '250px' }" style="transition: width 0.3s;">
+  <div class="mb-3 text-center">
+    <button
+      class="compose-btn d-flex align-items-center justify-content-center"
+      [ngClass]="{ collapsed: isCollapsed }"
+    >
+      <i class="fa fa-pencil" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
+      <span *ngIf="!isCollapsed">Compose</span>
+    </button>
+  </div>  
+
+  <ul class="nav flex-column">
+    <li class="sidebar-item" title="Inbox" routerLink="/inbox" routerLinkActive="active" [ngClass]="{ collapsed: isCollapsed }"
+    [routerLinkActiveOptions]="{ exact: true }">
+      <i class="fa fa-inbox" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
+      <span *ngIf="!isCollapsed">Inbox</span>
+    </li>
+    
+    <li class="sidebar-item" title="Starred" routerLink="/starred" routerLinkActive="active" [ngClass]="{ collapsed: isCollapsed }"
+    [routerLinkActiveOptions]="{ exact: true }">
+      <i class="fa fa-star" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
+      <span *ngIf="!isCollapsed">Starred</span>
+    </li>
+
+    <li class="sidebar-item" title="Snoozed" routerLink="/snoozed" routerLinkActive="active" [ngClass]="{ collapsed: isCollapsed }"
+    [routerLinkActiveOptions]="{ exact: true }">
+      <i class="fa fa-clock-o" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
+      <span *ngIf="!isCollapsed">Snoozed</span>
+    </li>
+
+    <li class="sidebar-item" title="Sent" routerLink="/sent" routerLinkActive="active" [ngClass]="{ collapsed: isCollapsed }"
+    [routerLinkActiveOptions]="{ exact: true }">
+      <i class="fa fa-send" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
+      <span *ngIf="!isCollapsed">Sent</span>
+    </li>
+
+    <li class="sidebar-item" title="Drafts" routerLink="/drafts" routerLinkActive="active" [ngClass]="{ collapsed: isCollapsed }"
+    [routerLinkActiveOptions]="{ exact: true }">
+      <i class="fa fa-file-text-o" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
+      <span *ngIf="!isCollapsed">Drafts</span>
+    </li>
+  </ul>  
+</div>
