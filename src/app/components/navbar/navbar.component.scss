@@ -1,7 +1,50 @@
 .bg-teal {
-    background-color: #0d9488;
+  background-color: #0d9488;
 }
 
+.search-bar {
+  max-width: 720px;
+  width: 100%;
+
+  .search-wrapper {
+    display: flex;
+    align-items: center;
+    height: 44px;
+    background-color: #f1f3f4;
+    border-radius: 24px;
+    padding: 0 1rem;
+    overflow: hidden;
+    white-space: nowrap;
+
+    &:focus-within {
+      box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
+    }
+
+    i {
+      color: #5f6368;
+
+      &.fa-search {
+        margin-right: 12px;
+      }
+
+      &.fa-sliders {
+        margin-left: 12px;
+      }
+    }
+
+    input {
+      flex-grow: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      min-width: 0;
+
+      &::placeholder {
+        color: #5f6368;
+      }
+    }
+  }
+}
 
 .icon-circle-hover {
   width: 40px;
@@ -14,11 +57,9 @@
   color: #5f6368;
   font-size: 1.25rem;
   cursor: pointer;
-  font-weight: 500;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
 
-.icon-circle-hover:hover {
-  background-color: #f1f3f4;
-  color: #202124;
+  &:hover {
+    background-color: #f1f3f4;
+    color: #202124;
+  }
 }

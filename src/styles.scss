@@ -1,1 +1,43 @@
-/* You can add global styles to this file, and also import other style files */
+.modal-content {
+    border-radius: 24px;
+    padding: 24px;
+    background-color: #f8f9fa;
+    border: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content .modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.modal-content .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #202124;
+}
+
+.modal-content .btn-close {
+    background: transparent;
+}
+
+.modal-content .modal-body {
+    color: #3c4043;
+    font-size: 0.95rem;
+}
+
+.modal-content .modal-body input,
+.modal-content .modal-body textarea {
+    border-radius: 12px;
+    padding: 10px 14px;
+}
+
+.modal-content .modal-body button[type="submit"] {
+    border-radius: 20px;
+    padding: 6px 18px;
+}
+
+/* Optional: Gmail-style darker overlay */
+.modal-backdrop.show {
+    background-color: rgba(60, 64, 67, 0.5);
+}

@@ -10,6 +10,9 @@ import { SentComponent } from './components/pages/sent/sent.component';
 import { StarredComponent } from './components/pages/starred/starred.component';
 import { SnoozedComponent } from './components/pages/snoozed/snoozed.component';
 import { DraftsComponent } from './components/pages/drafts/drafts.component';
+import { FormsModule } from '@angular/forms';
+import { PrimaryComponent } from './components/informations/primary/primary.component';
+import { ComposeComponent } from './components/compose/compose.component';
 
 @NgModule({
   declarations: [
@@ -20,11 +23,14 @@ import { DraftsComponent } from './components/pages/drafts/drafts.component';
     SentComponent,
     StarredComponent,
     SnoozedComponent,
-    DraftsComponent
+    DraftsComponent,
+    PrimaryComponent,
+    ComposeComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
