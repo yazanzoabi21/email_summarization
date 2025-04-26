@@ -1,34 +1,44 @@
 <div class="email-list">
-    <div *ngFor="let email of emails" class="email-item d-flex align-items-center py-2 px-3 ms-2 border-bottom"
-        [class.unread]="!email.isRead">
-        <!-- Checkbox + Star -->
-        <div class="d-flex align-items-center gap-2" style="width: 60px;">
-            <input type="checkbox" class="form-check-input" (click)="toggleEmailSelection($event)" />
-            <i class="fa-regular fa-star small-icon me-1 mt-1" (click)="toggleStar(email, $event)"[ngClass]="{
+    <div *ngFor="let email of emails" (click)="onEmailClick(email)" class="email-item"
+        [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }" (mouseenter)="email.hover = true"
+        (mouseleave)="email.hover = false">
+
+        <div class="checkbox-star d-flex align-items-center" style="width: 40px;">
+            <input type="checkbox" class="form-check-input m-0"
+                (click)="toggleEmailSelection(email, $event); $event.stopPropagation()"
+                [checked]="selectedEmails.includes(email)" />
+
+            <i class="fa-regular fa-star small-icon" (click)="toggleStar(email, $event); $event.stopPropagation()"
+                [ngClass]="{
                 'fa-regular': !email.isStarred,
                 'fa-solid text-warning': email.isStarred
               }">
             </i>
         </div>
 
-        <!-- Sender -->
-        <div class="fw-bold text-truncate" style="width: 180px;">
-            {{ email.sender }}
+        <div class="email-sender text-truncate">{{ email.sender }}</div>
+
+        <div class="email-subject-preview flex-grow-1 d-flex align-items-center">
+            <span class="email-subject fw-bold text-truncate">{{ email.subject }}</span>
+            <span class="email-preview text-muted text-truncate"> - {{ email.preview }}</span>
         </div>
 
-        <!-- Subject + Preview -->
-        <div class="email-content flex-grow-1">
-            <span class="fw-bold">{{ email.subject }}</span>
-            <span class="text-muted"> - {{ email.preview }}</span>
-        </div>
+        <div class="email-time text-muted text-end">{{ email.time }}</div>
 
-        <!-- Time -->
-        <div class="text-muted ms-2" style="width: 80px; text-align: right;">
-            {{ email.time }}
+        <div *ngIf="email.hover" class="email-actions d-flex align-items-center">
+            <button class="icon-button" (click)="archiveEmail(email)" (mousedown)="createRipple($event)">
+                <i class="fa-solid fa-box-archive"></i>
+            </button>
+            <button class="icon-button" (click)="deleteEmail(email)" (mousedown)="createRipple($event)">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+            <button class="icon-button" (click)="markEmailAsRead(email)" (mousedown)="createRipple($event)">
+                <i class="fa-regular fa-envelope-open"></i>
+            </button>
         </div>
     </div>
 
     <div *ngIf="emails.length === 0" class="text-center p-5 text-muted">
-        <p>No emails in Primary</p>
+        <p>No emails found</p>
     </div>
 </div>

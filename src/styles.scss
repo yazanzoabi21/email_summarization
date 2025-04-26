@@ -1,7 +1,7 @@
 .modal-content {
     border-radius: 24px;
-    padding: 24px;
-    background-color: #f8f9fa;
+    padding: 5px;
+    background-color: #ececec;
     border: none;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
@@ -15,10 +15,6 @@
     font-size: 1.25rem;
     font-weight: 600;
     color: #202124;
-}
-
-.modal-content .btn-close {
-    background: transparent;
 }
 
 .modal-content .modal-body {

@@ -1,87 +1,124 @@
 <div class="inbox-container">
-    <div class="d-flex align-items-center justify-content-between px-3 py-1 bg-white">
-      <div class="d-flex align-items-center gap-2">
-        <!-- Checkbox Dropdown -->
-        <div class="dropdown">
-          <div class="d-flex align-items-center icon-button gap-1" data-bs-toggle="dropdown">
-            <input class="form-check-input m-0" type="checkbox" />
-            <i class="fa fa-caret-down"></i>
+  <div [@fadeSlideAnimation]="selectedEmail ? 'email' : 'inbox'">
+    <ng-container *ngIf="!selectedEmail; else emailDetailView">
+      <div class="d-flex align-items-center justify-content-between px-3 py-2 bg-white border-bottom">
+        <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <ng-container *ngIf="selectedEmails.length > 0; else defaultHeader">
+              <button class="icon-button" (click)="archiveSelectedEmails()" title="Archive Selected">
+                <i class="fa-solid fa-box-archive"></i>
+              </button>
+              <button class="icon-button" (click)="deleteSelectedEmails()" title="Delete Selected">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+              <button class="icon-button" (click)="markSelectedAsRead()" title="Mark as Read">
+                <i class="fa-regular fa-envelope-open"></i>
+              </button>
+            </ng-container>
+
+            <ng-template #defaultHeader>
+              <!-- your existing dropdown + refresh button + more button -->
+              <div class="dropdown">
+                <div class="d-flex align-items-center icon-button gap-1" data-bs-toggle="dropdown" role="button">
+                  <input class="form-check-input m-0" type="checkbox" />
+                  <i class="fa fa-caret-down"></i>
+                </div>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" (click)="selectAll()">All</a></li>
+                  <li><a class="dropdown-item" (click)="selectNone()">None</a></li>
+                  <li><a class="dropdown-item" (click)="selectRead()">Read</a></li>
+                  <li><a class="dropdown-item" (click)="selectUnread()">Unread</a></li>
+                </ul>
+              </div>
+
+              <div class="icon-button ms-2" (click)="refresh()" title="Refresh">
+                <i class="fa fa-refresh"></i>
+              </div>
+
+              <div class="dropdown ms-2">
+                <div class="icon-button" data-bs-toggle="dropdown" role="button" title="More">
+                  <i class="fa fa-ellipsis-v"></i>
+                </div>
+                <ul class="dropdown-menu">
+                  <li>
+                    <a class="dropdown-item d-flex align-items-center gap-2" (click)="markAllAsRead()">
+                      <i class="far fa-envelope"></i> Mark all as read
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </ng-template>
           </div>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" (click)="selectAll()">All</a></li>
-            <li><a class="dropdown-item" (click)="selectNone()">None</a></li>
-            <li><a class="dropdown-item" (click)="selectRead()">Read</a></li>
-            <li><a class="dropdown-item" (click)="selectUnread()">Unread</a></li>
-          </ul>
         </div>
-  
-        <div class="icon-button ms-3" (click)="refresh()"><i class="fa fa-refresh"></i></div>
-  
-        <div class="dropdown ms-3">
-          <div class="icon-button" data-bs-toggle="dropdown" role="button">
-            <i class="fa fa-ellipsis-v"></i>
-          </div>
-          <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item d-flex align-items-center gap-2" (click)="markAllAsRead()">
-                <i class="far fa-envelope"></i> Mark all as read
-              </a>
-            </li>
-          </ul>
+
+        <div class="d-flex align-items-center gap-2 text-muted small">
+          <span>1–50 of 3</span>
+          <i class="fa fa-chevron-left icon-button"></i>
+          <i class="fa fa-chevron-right icon-button"></i>
         </div>
       </div>
-  
-      <!-- Right Info -->
-      <div class="d-flex align-items-center gap-2 text-muted small">
-        <span>1–50 of 3</span>
-        <i class="fa fa-chevron-left icon-button"></i>
-        <i class="fa fa-chevron-right icon-button"></i>
+
+      <div class="category-tabs d-flex align-items-center gap-4 border-bottom bg-white">
+        <div class="tab" [class.active]="activeTab === 'primary'" (click)="activeTab = 'primary'">
+          <i class="fa fa-inbox me-2"></i> Primary
+        </div>
+        <div class="tab" [class.active]="activeTab === 'promotions'" (click)="activeTab = 'promotions'">
+          <i class="fa fa-tag me-2"></i> Promotions
+        </div>
+        <div class="tab d-flex align-items-center" [class.active]="activeTab === 'social'"
+          (click)="activeTab = 'social'">
+          <i class="fa fa-users me-2"></i> Social
+          <span class="badge rounded-pill ms-2 bg-primary">3 new</span>
+        </div>
+        <div class="tab d-flex align-items-center" [class.active]="activeTab === 'updates'"
+          (click)="activeTab = 'updates'">
+          <i class="fa fa-info-circle me-2"></i> Updates
+          <span class="badge rounded-pill ms-2 bg-warning text-dark">7 new</span>
+        </div>
       </div>
-    </div>
-  
-    <!-- Category Tabs -->
-    <div class="category-tabs d-flex align-items-center gap-4 py-0 border-bottom bg-white">
-      <div class="tab" [class.active]="activeTab === 'primary'" (click)="activeTab = 'primary'">
-        <i class="fa fa-inbox me-2"></i> Primary
+
+      <div class="" *ngIf="activeTab === 'primary'">
+        <app-primary (emailClicked)="openEmail($event)"></app-primary>
       </div>
-  
-      <div class="tab" [class.active]="activeTab === 'promotions'" (click)="activeTab = 'promotions'">
-        <i class="fa fa-tag me-2"></i> Promotions
+
+      <div class="" *ngIf="activeTab === 'promotions'">
+        <div class="text-center p-5 text-muted">
+          <p>Promotions content will be displayed here</p>
+        </div>
       </div>
-  
-      <div class="tab d-flex align-items-center" [class.active]="activeTab === 'social'" (click)="activeTab = 'social'">
-        <i class="fa fa-users me-2"></i> Social
-        <span class="badge rounded-pill ms-2 bg-primary">3 new</span>
+
+      <div class="" *ngIf="activeTab === 'social'">
+        <div class="text-center p-5 text-muted">
+          <p>Social content will be displayed here</p>
+        </div>
       </div>
-  
-      <div class="tab d-flex align-items-center" [class.active]="activeTab === 'updates'" (click)="activeTab = 'updates'">
-        <i class="fa fa-info-circle me-2"></i> Updates
-        <span class="badge rounded-pill ms-2 bg-warning text-dark">7 new</span>
+
+      <div class="" *ngIf="activeTab === 'updates'">
+        <div class="text-center p-5 text-muted">
+          <p>Updates content will be displayed here</p>
+        </div>
       </div>
-    </div>
-  
-    <div class="pt-1" *ngIf="activeTab === 'primary'">
-      <app-primary></app-primary>
-    </div>
-    
-    <div class="pt-1" *ngIf="activeTab === 'promotions'">
-      <!-- Promotions content would go here -->
-      <div class="text-center p-5 text-muted">
-        <p>Promotions content will be displayed here</p>
+    </ng-container>
+
+    <ng-template #emailDetailView>
+      <div class="email-detail-card">
+        <div class="d-flex align-items-center mb-3">
+          <button class="btn btn-light btn-sm" (click)="closeEmail()">
+            <i class="fa fa-arrow-left"></i> Back
+          </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <h4 class="email-subject">{{ selectedEmail?.subject }}</h4>
+          <span class="email-label">Inbox</span>
+        </div>
+
+        <p class="email-from">From: {{ selectedEmail?.sender }}</p>
+
+        <p class="email-preview-text">{{ selectedEmail?.preview }}</p>
+
+        <p class="email-time-text">{{ selectedEmail?.time }}</p>
       </div>
-    </div>
-    
-    <div class="pt-1" *ngIf="activeTab === 'social'">
-      <!-- Social content would go here -->
-      <div class="text-center p-5 text-muted">
-        <p>Social content will be displayed here</p>
-      </div>
-    </div>
-    
-    <div class="pt-1" *ngIf="activeTab === 'updates'">
-      <!-- Updates content would go here -->
-      <div class="text-center p-5 text-muted">
-        <p>Updates content will be displayed here</p>
-      </div>
-    </div>
+    </ng-template>
   </div>
+</div>

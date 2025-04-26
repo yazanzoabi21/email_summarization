@@ -1,15 +1,75 @@
-<div class="modal fade" id="composeModal" tabindex="-1" aria-labelledby="composeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+<app-toast-component></app-toast-component>
+
+<div class="modal fade" #composeModal id="composeModal" tabindex="-1" aria-labelledby="composeModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg mt-5">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">New Message</h5>
+                <h4 class="modal-title">New Message</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
-                    <input type="email" class="form-control mb-3" placeholder="To" />
-                    <input type="text" class="form-control mb-3" placeholder="Subject" />
-                    <textarea rows="6" class="form-control mb-3" placeholder="Compose your message..."></textarea>
+                <form #composeForm="ngForm" (ngSubmit)="onSubmit(composeForm)">
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="To" name="to" [(ngModel)]="to" required
+                            email (blur)="validateEmailTouched = true"
+                            [class.is-invalid]="(validateEmailTouched || forceToValidation) && (!to || !isValidEmail(to))" />
+
+                        <div *ngIf="(validateEmailTouched || forceToValidation) && to && !isValidEmail(to)"
+                            class="invalid-feedback d-block text-start">
+                            Please enter a valid email address.
+                        </div>
+
+                        <div class="mt-2">
+                            <a (click)="showCc = !showCc; $event.preventDefault()">Cc</a> |
+                            <a (click)="showBcc = !showBcc; $event.preventDefault()">Bcc</a>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 position-relative" *ngIf="showCc">
+                        <input type="email" class="form-control pe-5" placeholder="Cc" name="cc" [(ngModel)]="cc" email
+                            (blur)="validateCcTouched = true"
+                            [class.is-invalid]="(validateCcTouched || forceToValidation) && ( (cc && !isValidEmail(cc)) || (!cc && showCc) )" />
+
+                        <button type="button"
+                            class="btn position-absolute top-50 end-0 translate-middle-y me-2 p-1 border-0"
+                            style="color: #999; font-size: 1.4rem;"
+                            (click)="cc=''; showCc=false; validateCcTouched=false" aria-label="Close">
+                            &times;
+                        </button>
+
+                        <div *ngIf="(validateCcTouched || forceToValidation) && cc && !isValidEmail(cc)"
+                            class="invalid-feedback d-block text-start">
+                            Please enter a valid CC email address.
+                        </div>
+                    </div>
+
+                    <div class="mb-3 position-relative" *ngIf="showBcc">
+                        <input type="email" class="form-control pe-5" placeholder="Bcc" name="bcc" [(ngModel)]="bcc"
+                            email (blur)="validateBccTouched = true"
+                            [class.is-invalid]="(validateBccTouched || forceToValidation) && ( (bcc && !isValidEmail(bcc)) || (!bcc && showBcc) )" />
+
+                        <button type="button"
+                            class="btn position-absolute top-50 end-0 translate-middle-y me-2 p-1 border-0"
+                            style="color: #999; font-size: 1.4rem;"
+                            (click)="bcc=''; showBcc=false; validateBccTouched=false" aria-label="Close">
+                            &times;
+                        </button>
+
+                        <div *ngIf="(validateBccTouched || forceToValidation) && bcc && !isValidEmail(bcc)"
+                            class="invalid-feedback d-block text-start">
+                            Please enter a valid BCC email address.
+                        </div>
+                    </div>
+
+                    <input type="text" class="form-control mb-3" placeholder="Subject" name="subject"
+                        [(ngModel)]="subject"
+                        [class.is-invalid]="composeForm.submitted && (!subject || subject.trim() === '')" />
+
+                    <textarea rows="6" class="form-control mb-3" placeholder="Compose your message..." name="body"
+                        [(ngModel)]="body" [class.is-invalid]="composeForm.submitted && (!body || body.trim() === '')">
+                    </textarea>
+
                     <button type="submit" class="btn btn-primary">Send</button>
                 </form>
             </div>

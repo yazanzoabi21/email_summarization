@@ -13,6 +13,9 @@ import { DraftsComponent } from './components/pages/drafts/drafts.component';
 import { FormsModule } from '@angular/forms';
 import { PrimaryComponent } from './components/informations/primary/primary.component';
 import { ComposeComponent } from './components/compose/compose.component';
+import { ToastComponentComponent } from './shared/toast-component/toast-component.component';
+import { NgToastModule } from 'ng-angular-popup';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -25,12 +28,15 @@ import { ComposeComponent } from './components/compose/compose.component';
     SnoozedComponent,
     DraftsComponent,
     PrimaryComponent,
-    ComposeComponent
+    ComposeComponent,
+    ToastComponentComponent
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
-    FormsModule
+    FormsModule,
+    NgToastModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,16 +1,20 @@
+.navbar-custom {
+  background-color: #F8FAFD !important;
+}
+
 .bg-teal {
   background-color: #0d9488;
 }
 
 .search-bar {
-  max-width: 720px;
-  width: 100%;
+  max-width: 900px;
+  margin-left: 100px;
 
   .search-wrapper {
     display: flex;
     align-items: center;
     height: 44px;
-    background-color: #f1f3f4;
+    background-color: #E9EEF6;
     border-radius: 24px;
     padding: 0 1rem;
     overflow: hidden;

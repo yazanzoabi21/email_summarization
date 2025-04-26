@@ -20,6 +20,9 @@ export class EmailService {
 
   private allEmails: Email[] = [];
   private starredEmails$ = new BehaviorSubject<Email[]>([]);
+  private selectedEmailsSubject = new BehaviorSubject<Email[]>([]);
+
+  selectedEmails$ = this.selectedEmailsSubject.asObservable();
 
   setEmails(emails: Email[]) {
     this.allEmails = emails;
@@ -38,5 +41,9 @@ export class EmailService {
   private updateStarred() {
     const starred = this.allEmails.filter(email => email.isStarred);
     this.starredEmails$.next(starred);
+  }
+
+  updateSelectedEmails(emails: Email[]) {
+    this.selectedEmailsSubject.next(emails);
   }
 }

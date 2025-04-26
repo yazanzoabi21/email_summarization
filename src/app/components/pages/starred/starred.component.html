@@ -1,29 +1,52 @@
-<div class="email-list">
-    <div *ngFor="let email of starredEmails" class="email-item d-flex align-items-center py-2 px-3 ms-2 border-bottom"
-        [class.unread]="!email.isRead">
-        <div class="d-flex align-items-center gap-2" style="width: 60px;">
-            <input type="checkbox" class="form-check-input" (click)="toggleEmailSelection($event)" />
-            <i class="fa-star small-icon me-1 mt-1" [ngClass]="{
-            'fa-regular': !email.isStarred,
-            'fa-solid text-warning': email.isStarred
-          }" (click)="toggleStar(email, $event)"></i>
-        </div>
+<div [@fadeSlideAnimation]="selectedEmail ? 'email' : 'inbox'">
+    <div class="email-list" *ngIf="!selectedEmail; else emailDetail">
+        <div class="email-item" *ngFor="let email of starredEmails" (click)="onEmailClick(email)">
+            <div class="checkbox-star d-flex align-items-center">
+                <input type="checkbox" class="form-check-input m-0"
+                    (click)="toggleEmailSelection($event); $event.stopPropagation()" />
+                <i class="fa-star small-icon"
+                    [ngClass]="{ 'fa-solid text-warning': email.isStarred, 'fa-regular': !email.isStarred }"
+                    (click)="toggleStar(email, $event); $event.stopPropagation()">
+                </i>
+            </div>
 
-        <div class="fw-bold text-truncate" style="width: 180px;">
-            {{ email.sender }}
-        </div>
+            <div class="email-sender">{{ email.sender }}</div>
 
-        <div class="email-content flex-grow-1">
-            <span class="fw-bold">{{ email.subject }}</span>
-            <span class="text-muted"> - {{ email.preview }}</span>
-        </div>
+            <div class="email-subject-preview">
+                <span class="email-label">Inbox</span>
+                <span class="email-subject">{{ email.subject }}</span>
+                <span class="email-preview"> - {{ email.preview }}</span>
+            </div>
 
-        <div class="text-muted ms-2" style="width: 80px; text-align: right;">
-            {{ email.time }}
+            <div class="email-time">{{ email.time }}</div>
+
+            <div class="email-actions">
+                <button class="action-button" (click)="archiveEmail(email); $event.stopPropagation()" title="Archive">
+                    <i class="fa-solid fa-box-archive"></i>
+                </button>
+                <button class="action-button" (click)="deleteEmail(email); $event.stopPropagation()" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button class="action-button" (click)="markEmailAsRead(email); $event.stopPropagation()"
+                    title="Mark as Read">
+                    <i class="fa-regular fa-envelope-open"></i>
+                </button>
+            </div>
         </div>
     </div>
 
-    <div *ngIf="starredEmails.length === 0" class="text-center p-5 text-muted">
-        <p>No starred messages...</p>
-    </div>
+    <ng-template #emailDetail>
+        <div class="email-detail-container">
+            <div class="email-detail-card">
+                <button class="btn btn-light mb-3" (click)="closeEmail()">
+                    <i class="fa fa-arrow-left"></i> Back
+                </button>
+
+                <h4 class="mb-2">{{ selectedEmail?.subject }}</h4>
+                <p class="text-muted mb-2">From: {{ selectedEmail?.sender }}</p>
+                <p>{{ selectedEmail?.preview }}</p>
+                <p class="text-muted mt-4">{{ selectedEmail?.time }}</p>
+            </div>
+        </div>
+    </ng-template>
 </div>

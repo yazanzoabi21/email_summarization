@@ -1,15 +1,15 @@
-<nav class="navbar d-flex align-items-center px-3 py-2 bg-white shadow-sm">
+<nav class="navbar navbar-custom d-flex align-items-center px-3 py-2 shadow-sm">
   <!-- Left: Menu + Logo -->
-  <div class="d-flex align-items-center gap-3">
+  <div class="d-flex align-items-center gap-3 me-3">
     <button class="btn btn-light p-2" (click)="toggleSidebar()" title="Toggle sidebar">
       <i class="fa fa-bars fs-4"></i>
     </button> 
     <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png" height="28" alt="Gmail logo" />
   </div>
 
-  <!-- Center: Search -->
-  <div class="flex-grow-1 d-flex justify-content-center mx-3">
-    <div class="search-bar w-100">
+  <!-- Search: Take full width after logo -->
+  <div class="flex-grow-1">
+    <div class="search-bar">
       <div class="search-wrapper">
         <i class="fa fa-search"></i>
         <input type="text" placeholder="Search mail" />
@@ -19,7 +19,7 @@
   </div>
 
   <!-- Right: Icons -->
-  <div class="d-flex align-items-center gap-2 flex-shrink-0">
+  <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-3">
     <div class="icon-circle-hover"><i class="fa fa-question-circle"></i></div>
     <div class="icon-circle-hover"><i class="fa fa-cog"></i></div>
     <div class="icon-circle-hover"><i class="fa fa-th"></i></div>
