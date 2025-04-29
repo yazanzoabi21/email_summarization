@@ -3,11 +3,12 @@
   <div class="d-flex align-items-center gap-3 me-3">
     <button class="btn btn-light p-2" (click)="toggleSidebar()" title="Toggle sidebar">
       <i class="fa fa-bars fs-4"></i>
-    </button> 
-    <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png" height="28" alt="Gmail logo" />
+    </button>
+    <img src="https://ssl.gstatic.com/ui/v1/icons/mail/rfr/logo_gmail_lockup_default_1x_r2.png" height="28"
+      alt="Gmail logo" />
   </div>
 
-  <!-- Search: Take full width after logo -->
+  <!-- Search -->
   <div class="flex-grow-1">
     <div class="search-bar">
       <div class="search-wrapper">
@@ -23,6 +24,105 @@
     <div class="icon-circle-hover"><i class="fa fa-question-circle"></i></div>
     <div class="icon-circle-hover"><i class="fa fa-cog"></i></div>
     <div class="icon-circle-hover"><i class="fa fa-th"></i></div>
-    <div class="rounded-circle bg-teal text-white d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">Z</div>
+
+    <!-- Account Dropdown -->
+    <div class="dropdown">
+      <button class="btn p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+          style="width: 32px; height: 32px;">
+          <i class="fa fa-user"></i>
+        </div>
+      </button>
+
+      <ul class="dropdown-menu dropdown-menu-end">
+        <!-- Show current logged-in account above the hr -->
+        <li *ngIf="accounts.length">
+          <div class="px-3 py-2">
+            <strong>{{ currentAccount.name }}</strong><br>
+            <small>{{ currentAccount.email }}</small>
+          </div>
+        </li>
+
+        <!-- Divider -->
+        <li *ngIf="accounts.length > 1">
+          <hr class="dropdown-divider">
+        </li>
+
+        <!-- Display other accounts below -->
+        <ng-container *ngIf="accounts.length">
+          <ng-container *ngFor="let account of accounts">
+            <li *ngIf="account !== currentAccount">
+              <button class="dropdown-item" (click)="switchAccount(account)">
+                {{ account.name }} ({{ account.email }})
+              </button>
+            </li>
+          </ng-container>
+        </ng-container>
+
+        <!-- No accounts available message -->
+        <li *ngIf="!accounts.length" class="p-0 text-center">
+          No account available.
+        </li>
+
+        <hr class="p-0">
+
+        <!-- Add New Account option, centered -->
+        <li>
+          <button class="dropdown-item text-primary border border-primary rounded-3" (click)="openAddAccountModal()">
+            <i class="fa fa-plus me-1"></i> Add another account
+          </button>
+        </li>
+
+        <!-- Logout option, centered -->
+        <li *ngIf="accounts.length">
+          <button class="dropdown-item text-danger border border-primary rounded-3 mt-2" (click)="logout()"
+            style="padding: 10px 20px;">
+            <i class="fa fa-sign-out-alt me-2"></i>Logout
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
+
+<!-- Modal for adding new account -->
+<div class="modal-backdrop fade show" *ngIf="showAddModal"></div>
+<div class="modal d-block" tabindex="-1" *ngIf="showAddModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Account</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeAddModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label>Full Name</label>
+            <input type="text" class="form-control" [(ngModel)]="newAccount.name" name="fullName" required
+              placeholder="Enter full name">
+            <small class="text-danger" *ngIf="formErrors.name">{{ formErrors.name }}</small>
+          </div>
+
+          <div class="mb-3">
+            <label>Email</label>
+            <input type="email" class="form-control" [(ngModel)]="newAccount.email" name="email" required
+              placeholder="Enter email address">
+            <small class="text-danger" *ngIf="formErrors.email">{{ formErrors.email }}</small>
+          </div>
+
+          <div class="mb-3">
+            <label>Password</label>
+            <input type="password" class="form-control" [(ngModel)]="newPassword" name="password" required
+              placeholder="Enter password">
+            <small class="text-danger" *ngIf="formErrors.password">{{ formErrors.password }}</small>
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitNewAccount()">Add Account</button>
+      </div>
+    </div>
+  </div>
+</div>
