@@ -1,6 +1,8 @@
 export interface Account {
-    name: string;
+    full_name: string;
     email: string;
+    password: string;
     expired?: boolean;
     isCurrent?: boolean;
+    isLoggedOut?: boolean;
 }

@@ -1,0 +1,376 @@
+$google-blue: #4285F4;
+$google-red: #DB4437;
+$google-yellow: #F4B400;
+$google-green: #0F9D58;
+$border-color: #dadce0;
+$card-shadow: rgba(0, 0, 0, 0.1);
+$google-text: #202124;
+$google-text-secondary: #5f6368;
+
+@mixin transition($property...) {
+    transition-property: $property;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    padding: 2rem 1rem;
+    font-family: 'Google Sans', Roboto, Arial, sans-serif;
+}
+
+.color-bar {
+    display: flex;
+    height: 4px;
+    width: 100%;
+
+    div {
+        flex: 1;
+        height: 100%;
+    }
+
+    .red {
+        background-color: $google-red;
+    }
+
+    .blue {
+        background-color: $google-blue;
+    }
+
+    .yellow {
+        background-color: $google-yellow;
+    }
+
+    .green {
+        background-color: $google-green;
+    }
+}
+
+.card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid $border-color;
+    box-shadow: 0 4px 20px $card-shadow;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    background-color: white;
+}
+
+.card-body {
+    padding: 32px 32px 0px;
+}
+
+.color-bar {
+    display: flex;
+    height: 4px;
+    width: 100%;
+
+    .red {
+        background-color: $google-red;
+    }
+
+    .blue {
+        background-color: $google-blue;
+    }
+
+    .yellow {
+        background-color: $google-yellow;
+    }
+
+    .green {
+        background-color: $google-green;
+    }
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+
+    .google-logo {
+        height: 24px;
+    }
+}
+
+.header-text {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h1 {
+        font-size: 24px;
+        font-weight: 400;
+        color: $google-text;
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        color: $google-text-secondary;
+        margin-bottom: 0;
+    }
+}
+
+.input-wrapper {
+    position: relative;
+    margin-bottom: 1.25rem;
+
+    .form-control {
+        border-radius: 4px;
+        border: 1px solid $border-color;
+        padding: 1rem 0.75rem 0 0.75rem;
+        height: 56px;
+        font-size: 16px;
+        line-height: 24px;
+        background-color: white;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+            box-shadow: 0 0 0 2px rgba($google-blue, 0.2);
+            border-color: $google-blue;
+        }
+
+        &::placeholder {
+            color: $google-text-secondary;
+            opacity: 1;
+        }
+    }
+
+    label {
+        position: absolute;
+        top: 16px;
+        left: 0.75rem;
+        font-size: 16px;
+        color: $google-text-secondary;
+        pointer-events: none;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus+label,
+    .form-control:not(:placeholder-shown)+label {
+        top: 6px;
+        font-size: 12px;
+        color: $google-blue;
+    }
+
+    .toggle-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: $google-text-secondary;
+        padding: 0.25rem;
+        z-index: 5;
+        cursor: pointer;
+        outline: none;
+
+        &:hover {
+            color: $google-blue;
+        }
+
+        i {
+            font-size: 1.25rem;
+        }
+    }
+}
+
+.input-wrapper.has-error .form-control {
+    border-color: $google-red;
+    box-shadow: 0 0 0 2px rgba($google-red, 0.2);
+}
+
+.error-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $google-red;
+    font-size: 1.2rem;
+    z-index: 10;
+}
+
+.input-group-wrapper {
+    position: relative;
+    margin-bottom: 1.5rem;
+
+    .form-control {
+        width: 100%;
+        height: 56px;
+        padding: 1rem 0.75rem 0 0.75rem;
+        font-size: 16px;
+        border: 1px solid $border-color;
+        border-radius: 4px;
+        background: #fff;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+            box-shadow: 0 0 0 2px rgba($google-blue, 0.2);
+            border-color: $google-blue;
+        }
+    }
+
+    .floating-label {
+        position: absolute;
+        top: 16px;
+        left: 12px;
+        font-size: 16px;
+        color: $google-text-secondary;
+        pointer-events: none;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus+.floating-label,
+    .form-control:not(:placeholder-shown)+.floating-label {
+        top: 6px;
+        font-size: 12px;
+        color: $google-blue;
+    }
+}
+
+.password-wrapper {
+    .form-control {
+        padding-right: 2.75rem;
+    }
+
+    .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: $google-text-secondary;
+        cursor: pointer;
+        padding: 0.25rem;
+        z-index: 10;
+
+        &:hover {
+            color: $google-blue;
+        }
+
+        i {
+            font-size: 1.2rem;
+        }
+    }
+}
+
+.google-link {
+    color: $google-blue;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.password-requirements {
+    color: $google-text-secondary;
+    font-size: 13px;
+    margin-top: -0.5rem;
+}
+
+.text-danger {
+    color: $google-red !important;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid $border-color;
+    padding: 1rem 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.language-select {
+    select {
+        color: $google-text-secondary;
+        font-size: 13px;
+        border: none;
+        background-color: transparent;
+
+        &:focus {
+            box-shadow: none;
+            border-color: transparent;
+        }
+    }
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    .btn-primary {
+        white-space: nowrap;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        background-color: $google-blue;
+        color: #fff;
+        border: 1px solid transparent;
+        @include transition(background-color, box-shadow, transform);
+
+        &:hover,
+        &:focus {
+            background-color: darken($google-blue, 6%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        &:active {
+            background-color: darken($google-blue, 8%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transform: translateY(0);
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 30px 24px 20px;
+    }
+
+    .card-footer {
+        padding: 1rem 24px;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+
+        .action-buttons {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+}
+
+@keyframes blueGlow {
+    0% {
+        box-shadow: 0 0 5px #4285F4;
+    }
+
+    50% {
+        box-shadow: 0 0 15px #4285F4;
+    }
+
+    100% {
+        box-shadow: 0 0 5px #4285F4;
+    }
+}
+
+.email-exists-animation {
+    animation: blueGlow 2s ease-in-out;
+    border: 1px solid #4285F4;
+}

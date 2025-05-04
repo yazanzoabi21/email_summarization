@@ -1,4 +1,3 @@
-// src/app/components/navbar/navbar.component.ts
 import { Component, OnInit } from '@angular/core';
 import { Account } from '../../shared/Interface/account';
 import { ToastService } from '../../shared/services/toast.service';
@@ -9,115 +8,150 @@ import { ToastService } from '../../shared/services/toast.service';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
-  accounts: Account[] = [];  // List of accounts
-  showAddModal = false;
-  newAccount: Account = { name: '', email: '', isCurrent: false };
-  newPassword = '';
-  formErrors = { email: '', password: '', name: '' };
+  accounts: Account[] = [];
   isSidebarVisible = false;
+  isAccountListOpen = true;
+
+  showLoginModal = false;
+  reactivateAccount: Account | null = null;
+  reactivatePassword = '';
+  reactivateError = '';
+
+  showAccountSelectionOnLogout = false;
+  loggedOutAccount: Account | null = null;
 
   constructor(private toastService: ToastService) {}
 
   ngOnInit(): void {
-    // Load accounts from localStorage if available
+    this.loadAccounts();
+    window.addEventListener('storage', this.handleStorageChange.bind(this));
+    this.listenForLoginMessages();
+  }
+
+  private loadAccounts(): void {
     const savedAccounts = localStorage.getItem('accounts');
-    if (savedAccounts) {
-      this.accounts = JSON.parse(savedAccounts);
-    }
-  }
-
-  get currentAccount(): Account {
-    return this.accounts.find(acc => acc.isCurrent) || { name: 'No account', email: 'No email available', isCurrent: false };
-  }
-
-  openAddAccountModal() {
-    this.newAccount = { name: '', email: '', isCurrent: false };
-    this.newPassword = '';
-    this.clearErrors();
-    this.showAddModal = true;
-  }
-
-  closeAddModal() {
-    this.showAddModal = false;
-  }
-
-  validateForm(): boolean {
-    this.clearErrors();
-    let isValid = true;
-
-    if (!this.newAccount.email) {
-      this.formErrors.email = 'Email is required.';
-      isValid = false;
-    } else if (!this.validateEmailFormat(this.newAccount.email)) {
-      this.formErrors.email = 'Email format is invalid.';
-      isValid = false;
-    }
-
-    if (!this.newPassword) {
-      this.formErrors.password = 'Password is required.';
-      isValid = false;
-    } else if (this.newPassword.length < 6) {
-      this.formErrors.password = 'Password must be at least 6 characters.';
-      isValid = false;
-    }
-
-    if (!this.newAccount.name) {
-      this.formErrors.name = 'Full Name is required.';
-      isValid = false;
-    }
-
-    return isValid;
-  }
-
-  validateEmailFormat(email: string): boolean {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  }
-
-  clearErrors() {
-    this.formErrors = { email: '', password: '', name: '' };
-  }
-
-  submitNewAccount() {
-    if (this.validateForm()) {
-      if (this.accounts.length === 0) {
-        this.newAccount.isCurrent = true;
-      }
-  
-      this.accounts.push({ ...this.newAccount });
-      this.updateLocalStorage();
-  
-      this.showAddModal = false;
-      this.toastService.show('Account added successfully!', 'success');
-    }
-  }
-
-  switchAccount(account: Account) {
-    this.accounts.forEach(acc => acc.isCurrent = false);
-    account.isCurrent = true;
-    this.updateLocalStorage();
-    this.toastService.show(`Switched to ${account.name}`, 'info');
-  }
-
-  toggleSidebar(): void {
-    this.isSidebarVisible = !this.isSidebarVisible;
-    console.log('Sidebar visibility:', this.isSidebarVisible);
-  }
-
-  logout() {
-    const index = this.accounts.findIndex(acc => acc.isCurrent);
-    if (index !== -1) {
-      const [loggedOutAccount] = this.accounts.splice(index, 1);
-      this.updateLocalStorage();
-      this.toastService.show(`Logged out from ${loggedOutAccount.name}`, 'success');
-      if (this.accounts.length > 0) {
-        this.accounts[0].isCurrent = true;
-        this.updateLocalStorage();
-      }
-    }
+    this.accounts = savedAccounts ? JSON.parse(savedAccounts) : [];
   }
 
   private updateLocalStorage(): void {
     localStorage.setItem('accounts', JSON.stringify(this.accounts));
+  }
+
+  get currentAccount(): Account {
+    return this.accounts.find(acc => acc.isCurrent) || { full_name: 'No account', email: 'No email available', password: '', isCurrent: false };
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarVisible = !this.isSidebarVisible;
+  }
+
+  toggleAccountList(): void {
+    this.isAccountListOpen = !this.isAccountListOpen;
+  }
+
+  openLoginInNewTab(): void {
+    window.open('/login', '_blank');
+  }
+
+  handleAccountClick(account: Account): void {
+    if (account.isCurrent) return;
+    account.isLoggedOut ? this.openReactivateModal(account) : this.switchAccount(account);
+  }
+
+  switchAccount(account: Account): void {
+    this.accounts.forEach(acc => acc.isCurrent = false);
+    account.isCurrent = true;
+    this.updateLocalStorage();
+    this.toastService.show(`Switched to ${account.email}`, 'info');
+  }
+
+  logout(): void {
+    const currentAccount = this.currentAccount;
+    if (!currentAccount || currentAccount.full_name === 'No account') return;
+  
+    const otherAccounts = this.accounts.filter(acc => acc.email !== currentAccount.email && !acc.isLoggedOut);
+    if (otherAccounts.length > 0) {
+      this.showAccountSelectionOnLogout = true;
+      this.loggedOutAccount = currentAccount;
+    } else {
+      currentAccount.isCurrent = false;
+      currentAccount.isLoggedOut = true;
+      this.updateLocalStorage();
+      this.toastService.show(`Logged out successfully`, 'success');
+    }
+  }  
+
+  cancelAccountSelection(): void {
+    if (this.loggedOutAccount) {
+      this.loggedOutAccount.isCurrent = true;
+      this.updateLocalStorage();
+    }
+    this.showAccountSelectionOnLogout = false;
+    this.toastService.show('No account is currently logged in', 'info');
+  }
+
+  selectAccountAfterLogout(account: Account): void {
+    if (this.loggedOutAccount) {
+      this.loggedOutAccount.isCurrent = false;
+      this.loggedOutAccount.isLoggedOut = true;
+    }
+    account.isCurrent = true;
+    account.isLoggedOut = false;
+    this.updateLocalStorage();
+    this.showAccountSelectionOnLogout = false;
+    this.toastService.show(`Switched to ${account.email}`, 'success');
+  }
+
+  openReactivateModal(account: Account): void {
+    this.reactivateAccount = account;
+    this.reactivatePassword = '';
+    this.reactivateError = '';
+    this.showLoginModal = true;
+  }
+
+  cancelReactivate(): void {
+    this.showLoginModal = false;
+    this.toastService.show('No account is currently logged in', 'info');
+  }
+
+  submitReactivate(): void {
+    if (!this.reactivatePassword.trim()) {
+      this.reactivateError = 'Password is required.';
+      return;
+    }
+    if (this.reactivateAccount) {
+      this.accounts.forEach(acc => acc.isCurrent = false);
+      this.reactivateAccount.isCurrent = true;
+      this.reactivateAccount.isLoggedOut = false;
+      this.updateLocalStorage();
+      this.showLoginModal = false;
+      this.toastService.show(`Logged in to ${this.reactivateAccount.email}`, 'success');
+    }
+  }
+
+  private listenForLoginMessages(): void {
+    window.addEventListener('message', (event) => {
+      if (event.data === 'login-success') {
+        this.loadAccounts();
+        const current = this.currentAccount;
+        this.toastService.show(
+          current ? `Logged in as ${current.email}` : 'Logged in successfully',
+          'success'
+        );
+      }
+    });
+  }
+
+  private handleStorageChange(event: StorageEvent): void {
+    if (event.key === 'newAccount' && event.newValue) {
+      const newAccount: Account = JSON.parse(event.newValue);
+      if (!this.accounts.some(acc => acc.email === newAccount.email)) {
+        this.accounts.forEach(acc => acc.isCurrent = false);
+        newAccount.isCurrent = true;
+        this.accounts.push(newAccount);
+        this.updateLocalStorage();
+      }
+      localStorage.removeItem('newAccount');
+    }
   }
 }

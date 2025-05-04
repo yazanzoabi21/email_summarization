@@ -16,6 +16,8 @@ import { ComposeComponent } from './components/compose/compose.component';
 import { ToastComponentComponent } from './shared/toast-component/toast-component.component';
 import { NgToastModule } from 'ng-angular-popup';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { LoginComponent } from './shared/login/login.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -29,14 +31,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     DraftsComponent,
     PrimaryComponent,
     ComposeComponent,
-    ToastComponentComponent
+    ToastComponentComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,
-    NgToastModule
+    NgToastModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

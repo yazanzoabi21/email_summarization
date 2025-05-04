@@ -25,7 +25,6 @@
     <div class="icon-circle-hover"><i class="fa fa-cog"></i></div>
     <div class="icon-circle-hover"><i class="fa fa-th"></i></div>
 
-    <!-- Account Dropdown -->
     <div class="dropdown">
       <button class="btn p-0 border-0" data-bs-toggle="dropdown" aria-expanded="false">
         <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
@@ -34,95 +33,115 @@
         </div>
       </button>
 
-      <ul class="dropdown-menu dropdown-menu-end">
-        <!-- Show current logged-in account above the hr -->
+      <ul class="dropdown-menu dropdown-menu-end mt-2 shadow-lg">
         <li *ngIf="accounts.length">
-          <div class="px-3 py-2">
-            <strong>{{ currentAccount.name }}</strong><br>
+          <div class="current-account">
+            <strong>{{ currentAccount.full_name }}</strong>
             <small>{{ currentAccount.email }}</small>
           </div>
         </li>
 
-        <!-- Divider -->
         <li *ngIf="accounts.length > 1">
           <hr class="dropdown-divider">
         </li>
 
-        <!-- Display other accounts below -->
-        <ng-container *ngIf="accounts.length">
-          <ng-container *ngFor="let account of accounts">
-            <li *ngIf="account !== currentAccount">
-              <button class="dropdown-item" (click)="switchAccount(account)">
-                {{ account.name }} ({{ account.email }})
-              </button>
-            </li>
-          </ng-container>
-        </ng-container>
+        <li *ngIf="accounts.length > 1" class="px-2">
+          <div class="account-switcher">
+            <div class="switch-account-header" (click)="$event.stopPropagation(); toggleAccountList()">
+              <span>Switch Account To:</span>
+              <i class="fas" [class.fa-chevron-down]="!isAccountListOpen" [class.fa-chevron-up]="isAccountListOpen"></i>
+            </div>
 
-        <!-- No accounts available message -->
-        <li *ngIf="!accounts.length" class="p-0 text-center">
+            <div class="account-list" [class.collapsed]="!isAccountListOpen">
+              <div *ngFor="let acc of accounts" class="account-item"
+                (click)="$event.stopPropagation(); handleAccountClick(acc)">
+                <i class="far" [class.fa-check-circle]="acc.isCurrent" [class.fa-circle]="!acc.isCurrent"
+                  [class.text-primary]="acc.isCurrent"></i>
+                {{ acc.email }}
+                <span *ngIf="acc.isLoggedOut && !acc.isCurrent" class="text-muted small ms-2">(logged out)</span>
+              </div>
+            </div>
+          </div>
+        </li>
+
+        <li *ngIf="!accounts.length" class="p-0 text-center mt-3">
           No account available.
         </li>
 
         <hr class="p-0">
 
-        <!-- Add New Account option, centered -->
-        <li>
-          <button class="dropdown-item text-primary border border-primary rounded-3" (click)="openAddAccountModal()">
-            <i class="fa fa-plus me-1"></i> Add another account
+        <li class="px-2 mb-3">
+          <button class="dropdown-item add-account-button" (click)="openLoginInNewTab()">
+            <i class="fa-solid fa-circle-plus"></i> Add another account
           </button>
         </li>
 
-        <!-- Logout option, centered -->
-        <li *ngIf="accounts.length">
-          <button class="dropdown-item text-danger border border-primary rounded-3 mt-2" (click)="logout()"
-            style="padding: 10px 20px;">
-            <i class="fa fa-sign-out-alt me-2"></i>Logout
+        <li class="px-2 mt-2 mb-2" *ngIf="accounts.length">
+          <button class="dropdown-item text-danger logout-button" (click)="logout()">
+            <i class="fa fa-sign-out-alt"></i> Logout current account
           </button>
         </li>
+
       </ul>
     </div>
   </div>
 </nav>
 
-<!-- Modal for adding new account -->
-<div class="modal-backdrop fade show" *ngIf="showAddModal"></div>
-<div class="modal d-block" tabindex="-1" *ngIf="showAddModal">
+<div class="modal fade" [class.show]="showLoginModal" [style.display]="showLoginModal ? 'block' : 'none'">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Add New Account</h5>
-        <button type="button" class="btn-close" aria-label="Close" (click)="closeAddModal()"></button>
+        <h5 class="modal-title">Login to {{reactivateAccount?.email}}</h5>
       </div>
       <div class="modal-body">
-        <form>
-          <div class="mb-3">
-            <label>Full Name</label>
-            <input type="text" class="form-control" [(ngModel)]="newAccount.name" name="fullName" required
-              placeholder="Enter full name">
-            <small class="text-danger" *ngIf="formErrors.name">{{ formErrors.name }}</small>
-          </div>
-
-          <div class="mb-3">
-            <label>Email</label>
-            <input type="email" class="form-control" [(ngModel)]="newAccount.email" name="email" required
-              placeholder="Enter email address">
-            <small class="text-danger" *ngIf="formErrors.email">{{ formErrors.email }}</small>
-          </div>
-
-          <div class="mb-3">
-            <label>Password</label>
-            <input type="password" class="form-control" [(ngModel)]="newPassword" name="password" required
-              placeholder="Enter password">
-            <small class="text-danger" *ngIf="formErrors.password">{{ formErrors.password }}</small>
-          </div>
-        </form>
+        <div class="mb-3">
+          <label>Email</label>
+          <input type="text" class="form-control" [value]="reactivateAccount?.email" readonly>
+        </div>
+        <div class="mb-3">
+          <label>Password</label>
+          <input type="password" class="form-control" [(ngModel)]="reactivatePassword">
+          <div *ngIf="reactivateError" class="text-danger small mt-1">{{reactivateError}}</div>
+        </div>
       </div>
-
       <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeAddModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="submitNewAccount()">Add Account</button>
+        <button class="btn btn-secondary" (click)="cancelReactivate()">Cancel</button>
+        <button class="btn btn-primary" (click)="submitReactivate()">Login</button>
       </div>
     </div>
   </div>
+</div>
+
+<div class="modal fade" [class.show]="showAccountSelectionOnLogout"
+  [style.display]="showAccountSelectionOnLogout ? 'block' : 'none'">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Select Account</h5>
+      </div>
+      <div class="modal-body">
+        <p>You're logging out from {{loggedOutAccount?.email}}. Select an account to continue:</p>
+        <div class="list-group">
+          <button *ngFor="let acc of accounts" class="list-group-item list-group-item-action"
+            (click)="selectAccountAfterLogout(acc)"
+            [disabled]="acc.email === loggedOutAccount?.email || acc.isLoggedOut">
+            <div class="d-flex align-items-center">
+              <i class="far" [class.fa-check-circle]="acc.isCurrent" [class.fa-user-circle]="!acc.isCurrent"
+                [class.text-primary]="acc.isCurrent"></i>
+              <div class="ms-2">
+                <strong>{{acc.full_name}}</strong>
+                <div class="text-muted small">{{acc.email}}</div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cancelAccountSelection()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop fade" [class.show]="showLoginModal" [style.display]="showLoginModal ? 'block' : 'none'">
 </div>

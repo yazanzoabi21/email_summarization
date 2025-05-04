@@ -1,11 +1,56 @@
-<div class="app-wrapper d-flex flex-column vh-100">
-  <app-navbar></app-navbar>
+<!-- <app-toast-component></app-toast-component>
 
-  <div class="app-body d-flex flex-grow-1 overflow-hidden">
-    <app-sidebar></app-sidebar>
+<ng-container *ngIf="!isLoginRoute(); else loginPage">
+  <div class="app-wrapper d-flex flex-column vh-100">
+    <app-navbar></app-navbar>
 
-    <div class="main-content flex-grow-1 overflow-auto">
-      <router-outlet></router-outlet>
+    <div class="app-body d-flex flex-grow-1 overflow-hidden">
+      <app-sidebar></app-sidebar>
+
+      <div class="main-content flex-grow-1 overflow-auto">
+        <router-outlet></router-outlet>
+      </div>
     </div>
   </div>
-</div>
+</ng-container>
+
+<ng-template #loginPage>
+  <router-outlet></router-outlet>
+</ng-template> -->
+
+<app-toast-component></app-toast-component>
+
+<ng-container *ngIf="!isLoginRoute(); else loginPage">
+  <div class="app-wrapper d-flex flex-column vh-100">
+    <app-navbar></app-navbar>
+
+    <div class="app-body d-flex flex-grow-1 overflow-hidden">
+      <app-sidebar></app-sidebar>
+
+      <div class="main-content flex-grow-1 overflow-auto">
+        <router-outlet></router-outlet>
+
+        <div *ngIf="showSessionExpiredModal" class="modal-backdrop show"></div>
+        <div *ngIf="showSessionExpiredModal" class="modal d-block" tabindex="-1" role="dialog">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Session Expired</h5>
+              </div>
+              <div class="modal-body">
+                <p>Your session has expired. Please log in again to continue.</p>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-primary" (click)="confirmSessionExpired()">Go to Login</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+<ng-template #loginPage>
+  <router-outlet></router-outlet>
+</ng-template>

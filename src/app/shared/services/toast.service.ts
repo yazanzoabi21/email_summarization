@@ -23,5 +23,5 @@ export class ToastService {
         this.toast.info(message, 'Info', duration);
         break;
     }
-  }
+  }  
 }

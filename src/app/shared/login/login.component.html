@@ -1,0 +1,165 @@
+<div class="login-container">
+    <!-- <ng-toast></ng-toast> -->
+    <div class="card">
+        <div class="color-bar">
+            <div class="red"></div>
+            <div class="blue"></div>
+            <div class="yellow"></div>
+            <div class="green"></div>
+        </div>
+
+        <div class="card-body">
+            <!-- <div class="text-center logo-container mb-4">
+                <svg viewBox="0 0 75 24" width="75" height="24" xmlns="http://www.w3.org/2000/svg" class="google-logo">
+                    <path fill="#4285F4"
+                        d="M28.4 19H15.1v-7.3h7.6c-.4-3.3-3.2-5.7-6.5-5.7-3.7 0-6.7 3-6.7 6.7s3 6.7 6.7 6.7c1.9 0 3.6-.8 4.8-2.1l4.8 2.8c-2.1 2.5-5.3 4.1-8.9 4.1-6.3 0-11.4-5.1-11.4-11.4s5.1-11.4 11.4-11.4c5.9 0 10.8 4.5 11.4 10.3V19z">
+                    </path>
+                    <path fill="#EA4335" d="M54 13.7V19h-5.7v-5.3H43v-5.6h5.3V2.4H54v5.7h5.6v5.6z"></path>
+                    <path fill="#FBBC05"
+                        d="M38.4 6.5V12H44c-.5 2.3-2.5 4-4.8 4-2.7 0-4.9-2.2-4.9-4.9s2.2-4.9 4.9-4.9c1.3 0 2.5.5 3.4 1.3l4.4-4.4C45.2 1.2 42.4 0 39.3 0c-5.6 0-10.2 4.6-10.2 10.2s4.6 10.2 10.2 10.2c5.6 0 10.2-4.6 10.2-10.2 0-1.2-.2-2.3-.6-3.4h-10.5z">
+                    </path>
+                    <path fill="#34A853"
+                        d="M76 12c0 6.6-5.4 12-12 12s-12-5.4-12-12 5.4-12 12-12 12 5.4 12 12zm-7.9-2c-.3-.8-1.1-1.3-2-1.3-.8 0-1.7.5-2 1.3L64 10c.3-.8 1.1-1.3 2-1.3.8 0 1.7.5 2 1.3h.1z">
+                    </path>
+                </svg>
+            </div> -->
+
+            <div class="text-center logo-container mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 40" width="120" height="40">
+                    <text x="0" y="30" font-family="'Product Sans', Arial, sans-serif" font-size="70" font-weight="500">
+                        <tspan fill="#4285F4">G</tspan>
+                        <tspan fill="#EA4335" dx="2">o</tspan>
+                        <tspan fill="#FBBC05" dx="2">o</tspan>
+                        <tspan fill="#4285F4" dx="2">g</tspan>
+                        <tspan fill="#34A853" dx="2">l</tspan>
+                        <tspan fill="#EA4335" dx="2">e</tspan>
+                    </text>
+                </svg>
+            </div>
+
+            <!-- <div class="text-center logo-container mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 40" width="110" height="40">
+                    <text x="0" y="30" font-family="'Product Sans', Arial, sans-serif" font-size="70" font-weight="500">
+                        <tspan fill="#4285F4">G</tspan>
+                        <tspan fill="#EA4335" dx="2">m</tspan>
+                        <tspan fill="#FBBC05" dx="2">a</tspan>
+                        <tspan fill="#34A853" dx="2">i</tspan>
+                        <tspan fill="#EA4335" dx="2">l</tspan>
+                    </text>
+                </svg>
+            </div> -->
+
+            <div class="header-text">
+                <h1 class="mb-2">{{ isSignIn ? 'Sign in' : 'Create your Google Account' }}</h1>
+                <p class="text-muted fs-6 mb-4">
+                    {{ isSignIn ? 'Use your Google Account' : 'to continue to Google services' }}
+                </p>
+            </div>
+
+            <ng-container *ngIf="!successfullyAddedEmail; else successCard">
+                <ng-container *ngIf="isSignIn; else createAccount">
+                    <form #loginForm="ngForm">
+                        <div class="input-wrapper" [class.has-error]="emailError">
+                            <input type="email" class="form-control" id="email" placeholder=" "
+                                [(ngModel)]="newAccount.email" name="email" (input)="onEmailInputChange()" required>
+                            <label for="email">Email</label>
+                            <ng-container *ngIf="emailError">
+                                <i class="bi bi-exclamation-circle-fill error-icon"></i>
+                            </ng-container>
+                        </div>
+
+                        <div class="input-wrapper" [class.has-error]="passwordError">
+                            <input [type]="hidePassword ? 'password' : 'text'" class="form-control" id="password"
+                                placeholder=" " [(ngModel)]="newAccount.password" name="password"
+                                (input)="onPasswordInputChange()" required>
+                            <label for="password">Password</label>
+                            <button type="button" class="toggle-icon btn" (click)="togglePasswordVisibility()">
+                                <i class="bi" [ngClass]="hidePassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                            </button>
+                            <ng-container *ngIf="passwordError">
+                                <i class="bi bi-exclamation-circle-fill error-icon"></i>
+                            </ng-container>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4">
+                            <a class="google-link">Forgot password?</a>
+                            <a class="google-link" (click)="toggleForm()">Create account</a>
+                        </div>
+                    </form>
+                </ng-container>
+
+                <ng-template #createAccount>
+                    <form>
+                        <div class="input-group-wrapper mb-3">
+                            <input type="text" id="fullName" class="form-control" placeholder=" "
+                                [(ngModel)]="newAccount.full_name" name="fullName" required>
+                            <label for="fullName" class="floating-label">Full name</label>
+                        </div>
+
+                        <div class="input-group-wrapper mb-3">
+                            <input type="email" id="emailCreate" class="form-control"
+                                [class.email-exists-animation]="emailExistsAnimation" placeholder=" "
+                                [(ngModel)]="newAccount.email" name="emailCreate" required>
+                            <label for="emailCreate" class="floating-label">Email</label>
+                        </div>
+
+                        <div class="input-group-wrapper password-wrapper">
+                            <input [type]="hidePassword ? 'password' : 'text'" id="passwordCreate" class="form-control"
+                                placeholder=" " [(ngModel)]="newAccount.password" name="passwordCreate" required>
+                            <label for="passwordCreate" class="floating-label">Password</label>
+                            <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+                                <i class="bi" [ngClass]="hidePassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                            </button>
+                        </div>
+
+                        <div class="input-group-wrapper password-wrapper">
+                            <input [type]="hideConfirmPassword ? 'password' : 'text'" id="confirmPassword"
+                                class="form-control" placeholder=" " [(ngModel)]="confirmPassword"
+                                name="confirmPassword" required>
+                            <label for="confirmPassword" class="floating-label">Confirm</label>
+                            <button type="button" class="toggle-password" (click)="toggleConfirmPasswordVisibility()">
+                                <i class="bi" [ngClass]="hideConfirmPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                            </button>
+                        </div>
+
+                        <p class="password-requirements small text-muted mb-4">
+                            Use 6 or more characters with a mix of letters, numbers & symbols
+                        </p>
+
+                        <div class="d-flex justify-content-end mb-4">
+                            <a class="google-link" (click)="toggleForm()">or Sign in instead</a>
+                        </div>
+                    </form>
+                </ng-template>
+            </ng-container>
+
+            <ng-template #successCard>
+                <div class="card text-center p-4 mb-4">
+                    <h2>Email Successfully Added 🎉</h2>
+                    <p class="text-muted mt-2 mb-4">Would you like to add another email or login?</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button class="btn btn-outline-primary" (click)="addAnotherEmail()">Add Another Email</button>
+                        <button class="btn btn-primary" (click)="goToLogin()">Login</button>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+
+        <div class="card-footer" *ngIf="!successfullyAddedEmail">
+            <div class="language-select">
+                <select class="form-select form-select-sm">
+                    <option>English (United States)</option>
+                    <option>Español</option>
+                    <option>Français</option>
+                    <option>Deutsch</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-primary"
+                    (click)="isSignIn ? submitLogin() : submitCreateAccount()">
+                    {{ isSignIn ? 'Sign in' : 'Create Account' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
