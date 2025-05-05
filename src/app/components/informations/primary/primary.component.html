@@ -1,7 +1,8 @@
-<div class="email-list">
-    <div *ngFor="let email of emails" (click)="onEmailClick(email)" class="email-item"
-        [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }" (mouseenter)="email.hover = true"
-        (mouseleave)="email.hover = false">
+<div class="email-table-wrapper">
+    <!-- <div *ngFor="let email of emails" (click)="onEmailClick(email)" class="email-item"
+        [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }">
+        (mouseenter)="email.hover = true"
+        (mouseleave)="email.hover = false"
 
         <div class="checkbox-star d-flex align-items-center" style="width: 40px;">
             <input type="checkbox" class="form-check-input m-0"
@@ -25,7 +26,8 @@
 
         <div class="email-time text-muted text-end">{{ email.time }}</div>
 
-        <div *ngIf="email.hover" class="email-actions d-flex align-items-center">
+        *ngIf="email.hover"
+        <div class="email-actions d-flex align-items-center">
             <button class="icon-button" (click)="archiveEmail(email)" (mousedown)="createRipple($event)">
                 <i class="fa-solid fa-box-archive"></i>
             </button>
@@ -36,7 +38,58 @@
                 <i class="fa-regular fa-envelope-open"></i>
             </button>
         </div>
-    </div>
+    </div> -->
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">
+                    <input type="checkbox" />
+                </th>
+                <th scope="col">Star</th>
+                <th scope="col">Sender</th>
+                <th scope="col">Subject</th>
+                <th scope="col">Preview</th>
+                <th scope="col">Time</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let email of emails" (click)="onEmailClick(email)"
+                [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }">
+                <td>
+                    <input type="checkbox" class="form-check-input" (click)="toggleEmailSelection(email, $event)"
+                        [checked]="selectedEmails.includes(email)" />
+                </td>
+                <td>
+                    <i class="fa-regular fa-star" (click)="toggleStar(email, $event); $event.stopPropagation()"
+                        [ngClass]="{
+                  'fa-regular': !email.isStarred,
+                  'fa-solid text-warning': email.isStarred
+                }">
+                    </i>
+                </td>
+                <td>{{ email.sender }}</td>
+                <td>{{ email.subject }}</td>
+                <td>{{ email.preview }}</td>
+                <td>{{ email.time }}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-secondary" (click)="archiveEmail(email)"
+                        (mousedown)="createRipple($event)">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="deleteEmail(email)"
+                        (mousedown)="createRipple($event)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" (click)="markEmailAsRead(email)"
+                        (mousedown)="createRipple($event)">
+                        <i class="fa-regular fa-envelope-open"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 
     <div *ngIf="emails.length === 0" class="text-center p-5 text-muted">
         <p>No emails found</p>

@@ -30,8 +30,14 @@ export class LoginService {
 
   checkEmail(email: string): Observable<{ email_exists: boolean }> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<{ email_exists: boolean }>(`${this.apiUrl}users/check-email`, { email }, { headers });
+    
+    return this.http.post<{ email_exists: boolean }>(
+      `${this.apiUrl}users/check-email`,
+      { email },
+      { headers }
+    );
   }
+  
 
   decodeAndStoreToken(token: string): void {
     const decodedToken = jwtDecode<{ exp: number }>(token);

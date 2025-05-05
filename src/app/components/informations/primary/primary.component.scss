@@ -182,3 +182,33 @@
     color: #202124;
   }
 }
+
+.email-table-wrapper {
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    vertical-align: middle;
+    text-align: center;
+    padding: 0.75rem;
+  }
+
+  th {
+    background-color: #f8f9fa;
+  }
+
+  .btn {
+    margin: 0 2px;
+  }
+
+  .read {
+    background-color: #f1f3f5;
+  }
+
+  .unread {
+    font-weight: bold;
+  }
+}

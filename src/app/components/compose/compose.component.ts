@@ -1,5 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { ToastService } from './../../shared/services/toast.service';
+import { EmailService } from '../../shared/services/email.service';
 
 declare var bootstrap: any;
 
@@ -28,7 +29,7 @@ export class ComposeComponent {
   validateBccTouched: boolean = false;
   forceToValidation: boolean = false;
 
-  constructor(private toastService: ToastService) {}
+  constructor(private toastService: ToastService, private emailService: EmailService) {}
 
   openModal() {
     setTimeout(() => {
@@ -51,36 +52,46 @@ export class ComposeComponent {
   
     const isToValid = this.to && this.isValidEmail(this.to);
     const isCcValid = !this.showCc || (this.cc && this.isValidEmail(this.cc));
-    const isBccValid = !this.showBcc ? true : (this.bcc && this.isValidEmail(this.bcc)); // 🔥 NEW
+    const isBccValid = !this.showBcc ? true : (this.bcc && this.isValidEmail(this.bcc));
     const isSubjectValid = this.subject && this.subject.trim() !== '';
     const isBodyValid = this.body && this.body.trim() !== '';
   
-    if (!isToValid || !isCcValid  || !isBccValid || !isSubjectValid || !isBodyValid) {
+    if (!isToValid || !isCcValid || !isBccValid || !isSubjectValid || !isBodyValid) {
       this.toastService.show('Please complete all required fields correctly.', 'error');
       return;
     }
   
-    console.log('Sending email...');
-    console.log('To:', this.to);
-    console.log('Cc:', this.cc);
-    console.log('Bcc:', this.bcc);
-    console.log('Subject:', this.subject);
-    console.log('Body:', this.body);
+    // 🟰 Build the Email object correctly
+    const emailPayload = {
+      id: 0, // backend will ignore it
+      sender: '', // backend also ignores
+      to: this.to,
+      subject: this.subject,
+      preview: this.body.slice(0, 100), // optional, just for your model
+      cc: this.cc,
+      bcc: this.bcc,
+      time: '', // backend will fill
+      isRead: false,
+      isStarred: false,
+      body: this.body // 🔥 OPTIONAL, if your backend accepts
+    };
   
-    this.toastService.show('Email sent successfully!', 'success');
-  
-    setTimeout(() => {
-      this.modalInstance?.hide();
-    }, 500);
-  
-    form.resetForm();
-    this.showCc = false;
-    this.showBcc = false;
-    this.validateEmailTouched = false;
-    this.validateCcTouched = false;
-    this.validateBccTouched = false;
-    this.forceToValidation = false;
-  }  
+    // 🟰 Send to the server
+    this.emailService.sendEmail(emailPayload).subscribe({
+      next: (response) => {
+        this.toastService.show('Email sent successfully!', 'success');
+        setTimeout(() => {
+          this.modalInstance?.hide();
+        }, 500);
+        form.resetForm();
+        this.resetForm();
+      },
+      error: (error) => {
+        this.toastService.show('Failed to send email. Please try again.', 'error');
+        console.error(error);
+      }
+    });
+  }    
 
   resetForm() {
     this.to = '';

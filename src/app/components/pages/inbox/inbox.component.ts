@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Email } from '../../../shared/Interface/email';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { EmailService } from '../../../shared/emailService';
+import { EmailService } from '../../../shared/services/email.service';
 
 @Component({
   selector: 'app-inbox',
@@ -32,9 +32,9 @@ export class InboxComponent implements OnInit {
   constructor(private emailService: EmailService) {}
 
   ngOnInit(): void {
-    this.emailService.selectedEmails$.subscribe((emails) => {
-      this.selectedEmails = emails;
-    });
+    // this.emailService.selectedEmails$.subscribe((emails) => {
+    //   this.selectedEmails = emails;
+    // });
   }
 
   markAllAsRead() {

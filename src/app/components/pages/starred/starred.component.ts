@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Email, EmailService } from '../../../shared/emailService';
+// import { Email, EmailService } from '../../../shared/emailService';
+import { EmailService } from '../../../shared/services/email.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { Email } from '../../../shared/Interface/email';
 
 @Component({
   selector: 'app-starred',
@@ -26,14 +28,14 @@ export class StarredComponent implements OnInit {
   constructor(private emailService: EmailService) {}
 
   ngOnInit(): void {
-    this.emailService.getStarredEmails().subscribe((emails) => {
-      this.starredEmails = emails;
-    });
+    // this.emailService.getStarredEmails().subscribe((emails) => {
+    //   this.starredEmails = emails;
+    // });
   }
 
   toggleStar(email: Email, event: Event): void {
     event.stopPropagation();
-    this.emailService.toggleStar(email);
+    // this.emailService.toggleStar(email);
   }
 
   toggleEmailSelection(event: Event): void {
