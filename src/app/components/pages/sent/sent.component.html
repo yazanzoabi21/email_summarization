@@ -1,1 +1,28 @@
-<p>sent works!</p>
+<div class="container mt-4">
+    <h2><i class="fa-solid fa-paper-plane"></i> Sent Emails</h2>
+
+    <div *ngIf="sentEmails.length === 0" class="alert alert-info text-center mt-4">
+        No sent emails yet.
+    </div>
+
+    <div *ngIf="sentEmails.length > 0" class="table-responsive">
+        <table class="table table-hover align-middle text-center">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col" style="width: 10%;">To</th>
+                    <th scope="col" style="width: 10%;">Subject</th>
+                    <th scope="col" style="width: 10%;">Body</th>
+                    <th scope="col" style="width: 10%;">Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let email of sentEmails">
+                    <td>{{ email.recipient }}</td>
+                    <td>{{ email.subject }}</td>
+                    <td>{{ email.body }}</td>
+                    <td>{{ email.time }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

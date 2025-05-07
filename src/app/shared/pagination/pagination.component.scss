@@ -1,0 +1,14 @@
+.icon-button {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.3s;
+}
+
+.icon-button:hover {
+    opacity: 1;
+}
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.3;
+}

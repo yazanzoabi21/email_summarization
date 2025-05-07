@@ -12,12 +12,14 @@
 export interface Email {
   id: number;
   sender: string;
-  to: string;
+  recipient: string;
   subject: string;
   preview: string;
+  body: string;
   cc: string;
   bcc: string;
   time: string;
+  status: string;
   isRead: boolean;
   isStarred: boolean;
 }

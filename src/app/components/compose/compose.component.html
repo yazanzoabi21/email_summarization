@@ -9,16 +9,16 @@
             <div class="modal-body">
                 <form #composeForm="ngForm" (ngSubmit)="onSubmit(composeForm)">
                     <div class="mb-3">
-                        <input type="email" class="form-control" placeholder="To" name="to" [(ngModel)]="to" required
-                            email (blur)="validateEmailTouched = true"
-                            [class.is-invalid]="(validateEmailTouched || forceToValidation) && (!to || !isValidEmail(to))" />
+                        <input type="email" class="form-control" placeholder="To" name="to" [(ngModel)]="recipient"
+                            required email (blur)="validateEmailTouched = true"
+                            [class.is-invalid]="(validateEmailTouched || forceToValidation) && (!recipient || !isValidEmail(recipient))" />
 
-                        <div *ngIf="(validateEmailTouched || forceToValidation) && to && !isValidEmail(to)"
+                        <div *ngIf="(validateEmailTouched || forceToValidation) && recipient && !isValidEmail(recipient)"
                             class="invalid-feedback d-block text-start">
                             Please enter a valid email address.
                         </div>
 
-                        <div class="mt-2">
+                        <div class="mt-2" style="cursor: pointer;">
                             <a (click)="showCc = !showCc; $event.preventDefault()">Cc</a> |
                             <a (click)="showBcc = !showBcc; $event.preventDefault()">Bcc</a>
                         </div>
@@ -68,7 +68,7 @@
                         [(ngModel)]="body" [class.is-invalid]="composeForm.submitted && (!body || body.trim() === '')">
                     </textarea>
 
-                    <button type="submit" class="btn btn-primary">Send</button>
+                    <button type="submit" class="btn btn-primary w-25">Send</button>
                 </form>
             </div>
         </div>

@@ -1,5 +1,4 @@
-<div class="email-table-wrapper">
-    <!-- <div *ngFor="let email of emails" (click)="onEmailClick(email)" class="email-item"
+<!-- <div *ngFor="let email of emails" (click)="onEmailClick(email)" class="email-item"
         [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }">
         (mouseenter)="email.hover = true"
         (mouseleave)="email.hover = false"
@@ -40,58 +39,80 @@
         </div>
     </div> -->
 
-    <table class="table table-hover">
-        <thead>
-            <tr>
-                <th scope="col">
-                    <input type="checkbox" />
-                </th>
-                <th scope="col">Star</th>
-                <th scope="col">Sender</th>
-                <th scope="col">Subject</th>
-                <th scope="col">Preview</th>
-                <th scope="col">Time</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let email of emails" (click)="onEmailClick(email)"
-                [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }">
-                <td>
-                    <input type="checkbox" class="form-check-input" (click)="toggleEmailSelection(email, $event)"
-                        [checked]="selectedEmails.includes(email)" />
-                </td>
-                <td>
-                    <i class="fa-regular fa-star" (click)="toggleStar(email, $event); $event.stopPropagation()"
-                        [ngClass]="{
-                  'fa-regular': !email.isStarred,
-                  'fa-solid text-warning': email.isStarred
-                }">
-                    </i>
-                </td>
-                <td>{{ email.sender }}</td>
-                <td>{{ email.subject }}</td>
-                <td>{{ email.preview }}</td>
-                <td>{{ email.time }}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="archiveEmail(email)"
-                        (mousedown)="createRipple($event)">
-                        <i class="fa-solid fa-box-archive"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" (click)="deleteEmail(email)"
-                        (mousedown)="createRipple($event)">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-primary" (click)="markEmailAsRead(email)"
-                        (mousedown)="createRipple($event)">
-                        <i class="fa-regular fa-envelope-open"></i>
-                    </button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<div class="email-table-wrapper">
+    <div class="table-responsive">
 
-    <div *ngIf="emails.length === 0" class="text-center p-5 text-muted">
-        <p>No emails found</p>
+        <div *ngIf="isLoading" class="alert alert-info text-center mt-3 mx-3">
+            Loading emails...
+        </div>
+
+        <div *ngIf="emails.length === 0 && !isLoading" class="text-center p-5 text-muted">
+            <p>No emails found</p>
+        </div>
+
+        <table *ngIf="!isLoading" class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <!-- <input type="checkbox" /> -->
+                    </th>
+                    <th scope="col"></th>
+                    <th scope="col">Subject</th>
+                    <!-- <th scope="col">Sender</th> -->
+                    <th scope="col">recipient</th>
+                    <th scope="col">Message</th>
+                    <th scope="col">Time</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let email of emails" (click)="onEmailClick(email)"
+                    [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }" style="cursor: pointer;">
+                    <td>
+                        <input type="checkbox" class="form-check-input" (click)="toggleEmailSelection(email, $event)"
+                            [checked]="selectedEmails.includes(email)" style="cursor: pointer;" />
+                    </td>
+                    <td>
+                        <i class="fa-regular fa-star" (click)="toggleStar(email, $event); $event.stopPropagation()"
+                            [ngClass]="{
+                      'fa-regular': !email.isStarred,
+                      'fa-solid text-warning': email.isStarred
+                    }">
+                        </i>
+                    </td>
+                    <td>{{ email.subject }}</td>
+                    <!-- <td>{{ email.sender }}</td> -->
+                    <td>{{ email.recipient }}</td>
+                    <td>{{ email.preview }}</td>
+                    <td>{{ email.time }}</td>
+                    <td>
+                        <span class="badge text-capitalize d-inline-block py-2 px-3 fw-bold" [ngClass]="{
+                            'bg-success': email.status === 'sent',
+                            'bg-warning text-dark': email.status === 'pending',
+                            'bg-danger': email.status === 'unsent'
+                          }" style="font-size: 0.85rem; min-width: 80px; text-align: center; border-radius: 8px;">
+                            {{ email.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center gap-1">
+                            <button class="btn btn-sm btn-outline-secondary p-1" (click)="archiveEmail(email)"
+                                (mousedown)="createRipple($event)">
+                                <i class="fa-solid fa-box-archive"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger p-1" (click)="deleteEmail(email)"
+                                (mousedown)="createRipple($event)">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary p-1" (click)="markEmailAsRead(email)"
+                                (mousedown)="createRipple($event)">
+                                <i class="fa-regular fa-envelope-open"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>

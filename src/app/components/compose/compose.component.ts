@@ -1,6 +1,8 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, ViewChild } from '@angular/core';
 import { ToastService } from './../../shared/services/toast.service';
 import { EmailService } from '../../shared/services/email.service';
+import { EmailEventsService } from './../../shared/services/email-events.service';
+import { Email } from '../../shared/Interface/email';
 
 declare var bootstrap: any;
 
@@ -12,8 +14,9 @@ declare var bootstrap: any;
 export class ComposeComponent {
   @ViewChild('composeModal') composeModalElement!: ElementRef;
   @ViewChild('composeForm') composeForm: any;
+  @Output() emailSent = new EventEmitter<void>();
 
-  to: string = '';
+  recipient: string = '';
   cc: string = '';
   bcc: string = '';
   subject: string = '';
@@ -29,7 +32,10 @@ export class ComposeComponent {
   validateBccTouched: boolean = false;
   forceToValidation: boolean = false;
 
-  constructor(private toastService: ToastService, private emailService: EmailService) {}
+  constructor(
+    private toastService: ToastService,
+    private emailService: EmailService,
+    private emailEventsService: EmailEventsService) {}
 
   openModal() {
     setTimeout(() => {
@@ -45,12 +51,9 @@ export class ComposeComponent {
 
   onSubmit(form: any): void {
     this.forceToValidation = true;
+    Object.values(form.controls).forEach((control: any) => control.markAsTouched());
   
-    Object.values(form.controls).forEach((control: any) => {
-      control.markAsTouched();
-    });
-  
-    const isToValid = this.to && this.isValidEmail(this.to);
+    const isToValid = this.recipient && this.isValidEmail(this.recipient);
     const isCcValid = !this.showCc || (this.cc && this.isValidEmail(this.cc));
     const isBccValid = !this.showBcc ? true : (this.bcc && this.isValidEmail(this.bcc));
     const isSubjectValid = this.subject && this.subject.trim() !== '';
@@ -61,25 +64,29 @@ export class ComposeComponent {
       return;
     }
   
-    // 🟰 Build the Email object correctly
-    const emailPayload = {
-      id: 0, // backend will ignore it
-      sender: '', // backend also ignores
-      to: this.to,
+    // ✅ 1. Create a pending email immediately
+    const pendingEmail: Email = {
+      id: Date.now(),
+      sender: '',
+      recipient: this.recipient,
       subject: this.subject,
-      preview: this.body.slice(0, 100), // optional, just for your model
+      preview: this.body.slice(0, 100),
       cc: this.cc,
       bcc: this.bcc,
-      time: '', // backend will fill
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'pending', // ✅ status pending
       isRead: false,
       isStarred: false,
-      body: this.body // 🔥 OPTIONAL, if your backend accepts
+      body: this.body,
     };
   
-    // 🟰 Send to the server
-    this.emailService.sendEmail(emailPayload).subscribe({
+    this.emailEventsService.emitPendingEmail(pendingEmail); // ✅ Emit pending immediately
+  
+    // ✅ 2. Now send the real email
+    this.emailService.sendEmail(pendingEmail).subscribe({
       next: (response) => {
         this.toastService.show('Email sent successfully!', 'success');
+        this.emailEventsService.emitEmailSent(); // ✅ Full reload after success
         setTimeout(() => {
           this.modalInstance?.hide();
         }, 500);
@@ -91,10 +98,10 @@ export class ComposeComponent {
         console.error(error);
       }
     });
-  }    
+  }  
 
   resetForm() {
-    this.to = '';
+    this.recipient = '';
     this.cc = '';
     this.bcc = '';
     this.subject = '';

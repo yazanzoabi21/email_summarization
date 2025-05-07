@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { Account } from '../../shared/Interface/account';
 import { ToastService } from '../../shared/services/toast.service';
 
@@ -8,6 +8,9 @@ import { ToastService } from '../../shared/services/toast.service';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent implements OnInit {
+  @Input() isCollapsed: boolean = false;
+  @Output() sidebarToggled = new EventEmitter<void>();
+
   accounts: Account[] = [];
   isSidebarVisible = false;
   isAccountListOpen = true;
@@ -16,6 +19,9 @@ export class NavbarComponent implements OnInit {
   reactivateAccount: Account | null = null;
   reactivatePassword = '';
   reactivateError = '';
+
+  isSidebarOpen = true;
+  // isCollapsed = false;
 
   showAccountSelectionOnLogout = false;
   loggedOutAccount: Account | null = null;
@@ -42,7 +48,7 @@ export class NavbarComponent implements OnInit {
   }
 
   toggleSidebar(): void {
-    this.isSidebarVisible = !this.isSidebarVisible;
+    this.sidebarToggled.emit();
   }
 
   toggleAccountList(): void {

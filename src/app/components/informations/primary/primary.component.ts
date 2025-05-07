@@ -1,6 +1,7 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { EmailService } from '../../../shared/services/email.service';
 import { Email } from '../../../shared/Interface/email';
+import { EmailEventsService } from '../../../shared/services/email-events.service';
 
 @Component({
   selector: 'app-primary',
@@ -9,23 +10,36 @@ import { Email } from '../../../shared/Interface/email';
 })
 export class PrimaryComponent implements OnInit {
   @Output() emailClicked = new EventEmitter<Email>();
+  @Input() emails: Email[] = [];
 
-  emails: Email[] = [];
+  allEmails: Email[] = [];
   selectedEmails: Email[] = [];
 
-  constructor(private emailService: EmailService) {}
+  isLoading: boolean = true;
+
+  constructor(private emailService: EmailService, private emailEventsService: EmailEventsService) {}
 
   ngOnInit() {
-    this.loadEmails();
+    this.fetchEmails();
+  
+    this.emailEventsService.emailSent$.subscribe(() => {
+      this.fetchEmails();
+    });
+  
+    this.emailEventsService.pendingEmail$.subscribe((pendingEmail) => {
+      this.emails.unshift(pendingEmail);
+    });
   }
 
-  loadEmails() {
+  fetchEmails() {
+    this.isLoading = true;
     this.emailService.getEmails().subscribe({
       next: (emails) => {
         this.emails = emails;
+        this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error fetching emails:', error);
+        this.isLoading = false;
       }
     });
   }

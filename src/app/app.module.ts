@@ -18,6 +18,8 @@ import { NgToastModule } from 'ng-angular-popup';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LoginComponent } from './shared/login/login.component';
 import { HttpClientModule } from '@angular/common/http';
+import { PaginationComponent } from './shared/pagination/pagination.component';
+import { ReceiveComponent } from './components/informations/receive/receive.component';
 
 @NgModule({
   declarations: [
@@ -32,7 +34,9 @@ import { HttpClientModule } from '@angular/common/http';
     PrimaryComponent,
     ComposeComponent,
     ToastComponentComponent,
-    LoginComponent
+    LoginComponent,
+    PaginationComponent,
+    ReceiveComponent
   ],
   imports: [
     BrowserModule,

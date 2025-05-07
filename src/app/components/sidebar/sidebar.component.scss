@@ -2,11 +2,14 @@
   background-color: #F1F3F4;
   height: 100vh;
   padding: 1rem;
-  transition: width 0.3s;
-}
+  width: 250px;
+  overflow-x: hidden;
+  transition: width 0.9s ease, padding 0.9s ease;
 
-.collapsed {
-  transition: width 0.3s;
+  &.collapsed {
+    width: 80px;
+    padding: 1rem 0.5rem;
+  }
 }
 
 .compose-btn {
@@ -17,24 +20,32 @@
   border-radius: 16px;
   font-weight: 500;
   font-size: 17px;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1.2rem;
+  transition: all 0.2s ease;
 
   &:hover {
     background-color: #b3dbf7;
   }
 
-  &.collapsed {
+  span {
+    display: inline;
+  }
+
+  .sidebar-custom.collapsed & {
     padding: 0;
     width: 45px;
     height: 45px;
-    border-radius: 25%;
+    border-radius: 50%;
     font-size: 18px;
     justify-content: center;
     align-items: center;
+
+    span {
+      display: none;
+    }
 
     i {
       margin: 0;
@@ -50,17 +61,18 @@
   border-radius: 10px;
   color: #3c4043;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
   width: 100%;
   margin-bottom: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease, width 0.3s ease;
 
   i {
     font-size: 1.1rem;
     transition: margin 0.2s ease;
+    margin-left: 7px;
   }
 
-  &:not(.collapsed) i {
-    margin-left: 7px;
+  span {
+    display: inline;
   }
 
   &:hover {
@@ -73,12 +85,24 @@
     color: #1a73e8;
   }
 
-  &.collapsed.active {
-    padding: 0 !important;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+  .sidebar-custom.collapsed & {
     justify-content: center;
-    align-items: center;
+    padding: 8px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+
+    i {
+      margin: 0;
+    }
+
+    span {
+      display: none;
+    }
+  }
+
+  .sidebar-custom.collapsed &.active {
+    background-color: #d3e3fd;
+    color: #1a73e8;
   }
 }

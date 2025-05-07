@@ -24,17 +24,55 @@ import { EmailService } from '../../../shared/services/email.service';
 export class InboxComponent implements OnInit {
   activeTab = 'primary';
   selectedEmailsExist = false;
-  selectedEmail: Email | null = null
+  selectedEmail: Email | null = null;
   scrollPosition = 0;
+
+  allEmails: Email[] = [];
+  emails: Email[] = [];
+
+  currentPage = 1;
+  itemsPerPage = 25;
+  totalItems = 0;
 
   selectedEmails: Email[] = [];
 
   constructor(private emailService: EmailService) {}
 
   ngOnInit(): void {
-    // this.emailService.selectedEmails$.subscribe((emails) => {
-    //   this.selectedEmails = emails;
-    // });
+    this.loadEmails();
+  }
+
+  loadEmails() {
+    this.emailService.getEmails().subscribe({
+      next: (emails) => {
+        this.allEmails = emails;
+        this.totalItems = emails.length;
+        this.updateDisplayedEmails();
+      },
+      error: (error) => {
+        console.error('Error fetching emails:', error);
+      }
+    });
+  }
+
+  updateDisplayedEmails() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.emails = this.allEmails.slice(start, end);
+  }
+
+  nextPage() {
+    if (this.currentPage * this.itemsPerPage < this.totalItems) {
+      this.currentPage++;
+      this.updateDisplayedEmails();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updateDisplayedEmails();
+    }
   }
 
   markAllAsRead() {
@@ -65,7 +103,7 @@ export class InboxComponent implements OnInit {
     this.scrollPosition = window.scrollY;
     this.selectedEmail = email;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }  
+  }
 
   closeEmail() {
     this.selectedEmail = null;
@@ -76,16 +114,13 @@ export class InboxComponent implements OnInit {
 
   archiveSelectedEmails() {
     console.log('Archive these emails:', this.selectedEmails);
-    // your archive logic
   }
   
   deleteSelectedEmails() {
     console.log('Delete these emails:', this.selectedEmails);
-    // your delete logic
   }
   
   markSelectedAsRead() {
     console.log('Mark as read these emails:', this.selectedEmails);
-    // your mark as read logic
-  }  
+  }
 }

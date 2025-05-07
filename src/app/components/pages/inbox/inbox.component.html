@@ -51,16 +51,27 @@
           </div>
         </div>
 
-        <div class="d-flex align-items-center gap-2 text-muted small">
+        <!-- <div class="d-flex align-items-center gap-2 text-muted small">
           <span>1–50 of 3</span>
           <i class="fa fa-chevron-left icon-button"></i>
           <i class="fa fa-chevron-right icon-button"></i>
+        </div> -->
+
+        <div class="d-flex align-items-center gap-2 text-muted small">
+          <span>{{ (currentPage - 1) * itemsPerPage + 1 }}–{{ currentPage * itemsPerPage > totalItems ? totalItems :
+            currentPage * itemsPerPage }} of {{ totalItems }}</span>
+          <i class="fa fa-chevron-left icon-button" (click)="prevPage()" [class.disabled]="currentPage === 1"></i>
+          <i class="fa fa-chevron-right icon-button" (click)="nextPage()"
+            [class.disabled]="currentPage * itemsPerPage >= totalItems"></i>
         </div>
       </div>
 
       <div class="category-tabs d-flex align-items-center gap-4 border-bottom bg-white">
         <div class="tab" [class.active]="activeTab === 'primary'" (click)="activeTab = 'primary'">
           <i class="fa fa-inbox me-2"></i> Primary
+        </div>
+        <div class="tab" [class.active]="activeTab === 'receives'" (click)="activeTab = 'receives'">
+          <i class="fa-solid fa-envelope-open me-2"></i> receives
         </div>
         <div class="tab" [class.active]="activeTab === 'promotions'" (click)="activeTab = 'promotions'">
           <i class="fa fa-tag me-2"></i> Promotions
@@ -78,7 +89,14 @@
       </div>
 
       <div class="" *ngIf="activeTab === 'primary'">
-        <app-primary (emailClicked)="openEmail($event)"></app-primary>
+        <app-primary [emails]="emails" (emailClicked)="openEmail($event)"></app-primary>
+      </div>
+
+      <div class="" *ngIf="activeTab === 'receives'">
+        <!-- <div class="text-center p-5 text-muted">
+          <p>Receive content will be displayed here</p>
+        </div> -->
+        <app-receive></app-receive>
       </div>
 
       <div class="" *ngIf="activeTab === 'promotions'">

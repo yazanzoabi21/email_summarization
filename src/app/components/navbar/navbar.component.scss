@@ -1,5 +1,15 @@
 .navbar-custom {
   background-color: #F8FAFD !important;
+  flex-wrap: nowrap; // 🧹 Prevents wrapping to new lines even at small screens
+  min-width: 0;
+}
+
+.navbar-left,
+.navbar-center,
+.navbar-right {
+  display: flex;
+  align-items: center;
+  min-width: 0; // 🧹 prevent overflow issues
 }
 
 .bg-teal {
@@ -7,10 +17,22 @@
 }
 
 .search-bar {
+  // max-width: 900px;
+  // margin-left: 100px;
+  width: 100%;
   max-width: 900px;
-  margin-left: 100px;
+  margin-left: 20px;
+  margin-right: 20px;
 
   .search-wrapper {
+    // display: flex;
+    // align-items: center;
+    // height: 44px;
+    // background-color: #E9EEF6;
+    // border-radius: 24px;
+    // padding: 0 1rem;
+    // overflow: hidden;
+    // white-space: nowrap;
     display: flex;
     align-items: center;
     height: 44px;
@@ -18,7 +40,8 @@
     border-radius: 24px;
     padding: 0 1rem;
     overflow: hidden;
-    white-space: nowrap;
+    flex-grow: 1;
+    min-width: 0;
 
     &:focus-within {
       box-shadow: 0 1px 6px rgba(32, 33, 36, 0.28);
@@ -50,6 +73,11 @@
   }
 }
 
+.navbar-right {
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 .icon-circle-hover {
   width: 40px;
   height: 40px;
@@ -61,6 +89,7 @@
   color: #5f6368;
   font-size: 1.25rem;
   cursor: pointer;
+  flex-shrink: 0;
 
   &:hover {
     background-color: #f1f3f4;

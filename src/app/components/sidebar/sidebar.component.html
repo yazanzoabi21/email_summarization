@@ -1,11 +1,10 @@
-<div class="sidebar-custom vh-100 p-3 shadow-sm" [ngStyle]="{ width: isCollapsed ? '80px' : '250px' }"
-  style="transition: width 0.3s;">
+<div class="sidebar-custom vh-100 p-3 shadow-sm" [class.collapsed]="isCollapsed" style="transition: width 0.3s;">
   <!-- Compose Button -->
   <div class="mb-3 text-center">
     <button class="compose-btn d-flex align-items-center justify-content-center" [ngClass]="{ collapsed: isCollapsed }"
       (click)="openComposeModal()">
-      <i class="fa fa-pencil" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
-      <span *ngIf="!isCollapsed">Compose</span>
+      <i class="fa fa-plus" [ngClass]="{ 'offset-icon': !isCollapsed }"></i>
+      <span *ngIf="!isCollapsed">Send Email</span>
     </button>
 
     <app-compose #compose></app-compose>

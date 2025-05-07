@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { jwtDecode } from 'jwt-decode';
 import { ToastService } from './shared/services/toast.service';
@@ -9,8 +9,12 @@ import { ToastService } from './shared/services/toast.service';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+  @ViewChild('compose') composeComponent!: any;
+
   title = 'email-summarization';
   showSessionExpiredModal = false;
+
+  isCollapsed: boolean = false;
 
   constructor(
     public router: Router,
@@ -19,6 +23,20 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.checkSessionExpiration();
+    this.handleResize(window.innerWidth); 
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.handleResize(event.target.innerWidth);
+  }
+
+  handleResize(width: number) {
+    if (width < 768) {
+      this.isCollapsed = true; // ✅ Collapse automatically
+    } else {
+      this.isCollapsed = false; // ✅ Expand automatically
+    }
   }
 
   checkSessionExpiration() {
@@ -57,5 +75,9 @@ export class AppComponent implements OnInit {
 
   isLoginRoute(): boolean {
     return this.router.url === '/login';
+  }
+
+  toggleSidebar(): void {
+    this.isCollapsed = !this.isCollapsed;
   }
 }

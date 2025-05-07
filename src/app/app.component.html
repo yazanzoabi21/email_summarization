@@ -1,31 +1,11 @@
-<!-- <app-toast-component></app-toast-component>
-
-<ng-container *ngIf="!isLoginRoute(); else loginPage">
-  <div class="app-wrapper d-flex flex-column vh-100">
-    <app-navbar></app-navbar>
-
-    <div class="app-body d-flex flex-grow-1 overflow-hidden">
-      <app-sidebar></app-sidebar>
-
-      <div class="main-content flex-grow-1 overflow-auto">
-        <router-outlet></router-outlet>
-      </div>
-    </div>
-  </div>
-</ng-container>
-
-<ng-template #loginPage>
-  <router-outlet></router-outlet>
-</ng-template> -->
-
 <app-toast-component></app-toast-component>
 
 <ng-container *ngIf="!isLoginRoute(); else loginPage">
   <div class="app-wrapper d-flex flex-column vh-100">
-    <app-navbar></app-navbar>
+    <app-navbar [isCollapsed]="isCollapsed" (sidebarToggled)="toggleSidebar()"></app-navbar>
 
     <div class="app-body d-flex flex-grow-1 overflow-hidden">
-      <app-sidebar></app-sidebar>
+      <app-sidebar [isCollapsed]="isCollapsed"></app-sidebar>
 
       <div class="main-content flex-grow-1 overflow-auto">
         <router-outlet></router-outlet>

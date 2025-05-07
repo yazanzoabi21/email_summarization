@@ -1,0 +1,5 @@
+<div class="d-flex align-items-center gap-2 text-muted small">
+    <span>{{ getRangeStart() }}–{{ getRangeEnd() }} of {{ totalItems }}</span>
+    <i class="fa fa-chevron-left icon-button" (click)="prevPage()" [class.disabled]="currentPage === 1"></i>
+    <i class="fa fa-chevron-right icon-button" (click)="nextPage()" [class.disabled]="currentPage === totalPages"></i>
+</div>

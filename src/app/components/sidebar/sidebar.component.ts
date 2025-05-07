@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
-import { SidebarService } from '../../shared/sidebarService';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -7,23 +6,15 @@ import { Subscription } from 'rxjs';
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
-export class SidebarComponent implements OnInit, OnDestroy {
+export class SidebarComponent {
   @ViewChild('compose') composeComponent!: any;
+  @Input() isCollapsed: boolean= false;
 
-  isCollapsed = false;
-  private sub!: Subscription;
+  constructor() {}
 
-  constructor(private sidebarService: SidebarService) {}
-
-  ngOnInit() {
-    this.sub = this.sidebarService.isOpen$.subscribe((isOpen) => {
-      this.isCollapsed = !isOpen;
-    });
-  }
-
-  ngOnDestroy() {
-    this.sub.unsubscribe();
-  }
+  // toggleSidebar() {
+  //   this.isCollapsed = !this.isCollapsed;
+  // }
 
   openComposeModal() {
     this.composeComponent.openModal();

@@ -184,9 +184,18 @@
 }
 
 .email-table-wrapper {
+  width: 100%;
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    min-height: 0.01%;
+  }
+
   table {
     width: 100%;
     border-collapse: collapse;
+    min-width: 1000px;
   }
 
   th,

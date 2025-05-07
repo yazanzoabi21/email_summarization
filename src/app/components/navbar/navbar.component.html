@@ -1,6 +1,6 @@
 <nav class="navbar navbar-custom d-flex align-items-center px-3 py-2 shadow-sm">
   <!-- Left: Menu + Logo -->
-  <div class="d-flex align-items-center gap-3 me-3">
+  <div class="navbar-left d-flex align-items-center gap-3 me-3">
     <button class="btn btn-light p-2" (click)="toggleSidebar()" title="Toggle sidebar">
       <i class="fa fa-bars fs-4"></i>
     </button>
@@ -9,8 +9,8 @@
   </div>
 
   <!-- Search -->
-  <div class="flex-grow-1">
-    <div class="search-bar">
+  <div class="navbar-center flex-grow-1 d-flex align-items-center">
+    <div class="search-bar flex-grow-1">
       <div class="search-wrapper">
         <i class="fa fa-search"></i>
         <input type="text" placeholder="Search mail" />
@@ -20,7 +20,7 @@
   </div>
 
   <!-- Right: Icons -->
-  <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-3">
+  <div class="navbar-right d-flex align-items-center gap-2 ms-3 flex-shrink-0">
     <div class="icon-circle-hover"><i class="fa fa-question-circle"></i></div>
     <div class="icon-circle-hover"><i class="fa fa-cog"></i></div>
     <div class="icon-circle-hover"><i class="fa fa-th"></i></div>
@@ -70,15 +70,15 @@
 
         <hr class="p-0">
 
-        <li class="px-2 mb-3">
-          <button class="dropdown-item add-account-button" (click)="openLoginInNewTab()">
+        <li class="px-2 mb-2">
+          <button class="dropdown-item add-account-button text-center" (click)="openLoginInNewTab()">
             <i class="fa-solid fa-circle-plus"></i> Add another account
           </button>
         </li>
 
-        <li class="px-2 mt-2 mb-2" *ngIf="accounts.length">
-          <button class="dropdown-item text-danger logout-button" (click)="logout()">
-            <i class="fa fa-sign-out-alt"></i> Logout current account
+        <li class="px-2 mt-0 mb-2" *ngIf="accounts.length">
+          <button class="dropdown-item text-danger logout-button text-center" (click)="logout()">
+            <i class="fa fa-sign-out-alt"></i> Logout
           </button>
         </li>
 
