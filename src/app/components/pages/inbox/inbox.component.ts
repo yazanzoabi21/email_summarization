@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Email } from '../../../shared/Interface/email';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { EmailService } from '../../../shared/services/email.service';
+import { PrimaryComponent } from '../../informations/primary/primary.component';
+import { ReceiveComponent } from '../../informations/receive/receive.component';
 
 @Component({
   selector: 'app-inbox',
@@ -22,7 +23,10 @@ import { EmailService } from '../../../shared/services/email.service';
   ]
 })
 export class InboxComponent implements OnInit {
-  activeTab = 'primary';
+  @ViewChild(PrimaryComponent) primaryComponent!: PrimaryComponent;
+  @ViewChild(ReceiveComponent) receiveComponent!: ReceiveComponent;
+
+  activeTab = 'composed';
   selectedEmailsExist = false;
   selectedEmail: Email | null = null;
   scrollPosition = 0;
@@ -35,6 +39,8 @@ export class InboxComponent implements OnInit {
   totalItems = 0;
 
   selectedEmails: Email[] = [];
+
+  paginationLoading = false;
 
   constructor(private emailService: EmailService) {}
 
@@ -63,17 +69,38 @@ export class InboxComponent implements OnInit {
 
   nextPage() {
     if (this.currentPage * this.itemsPerPage < this.totalItems) {
+      this.paginationLoading = true;
       this.currentPage++;
-      this.updateDisplayedEmails();
+  
+      setTimeout(() => {
+        this.refresh();
+        this.paginationLoading = false;
+      }, 300); // simulate brief loading
+    }
+  }
+  
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.paginationLoading = true;
+      this.currentPage--;
+  
+      setTimeout(() => {
+        this.refresh();
+        this.paginationLoading = false;
+      }, 300);
     }
   }
 
-  prevPage() {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updateDisplayedEmails();
+  switchTab(tab: string) {
+    if (this.activeTab !== tab) {
+      this.paginationLoading = true;
+      this.activeTab = tab;
+  
+      setTimeout(() => {
+        this.refresh();
+      }, 100);
     }
-  }
+  }  
 
   markAllAsRead() {
     console.log('Mark all as read clicked');
@@ -96,7 +123,11 @@ export class InboxComponent implements OnInit {
   }
   
   refresh() {
-    console.log('Refresh clicked');
+    if (this.activeTab === 'composed') {
+      this.primaryComponent?.refresh();
+    } else if (this.activeTab === 'receives') {
+      this.receiveComponent?.refresh();
+    }
   }
 
   openEmail(email: Email) {

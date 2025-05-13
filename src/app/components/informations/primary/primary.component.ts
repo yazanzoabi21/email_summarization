@@ -10,14 +10,24 @@ import { EmailEventsService } from '../../../shared/services/email-events.servic
 })
 export class PrimaryComponent implements OnInit {
   @Output() emailClicked = new EventEmitter<Email>();
+  @Output() refreshRequested = new EventEmitter<void>();
+  @Output() totalItemsChanged = new EventEmitter<number>();
+  @Output() loadingFinished = new EventEmitter<void>();
+
   @Input() emails: Email[] = [];
+  @Input() currentPage: number = 1;
+  @Input() itemsPerPage: number = 25;
 
   allEmails: Email[] = [];
   selectedEmails: Email[] = [];
+  selectedEmail: Email | null = null;
 
   isLoading: boolean = true;
 
-  constructor(private emailService: EmailService, private emailEventsService: EmailEventsService) {}
+  constructor(
+    private emailService: EmailService, 
+    private emailEventsService: EmailEventsService
+  ) {}
 
   ngOnInit() {
     this.fetchEmails();
@@ -35,24 +45,46 @@ export class PrimaryComponent implements OnInit {
     this.isLoading = true;
     this.emailService.getEmails().subscribe({
       next: (emails) => {
-        this.emails = emails;
+        this.allEmails = emails;
+        this.totalItemsChanged.emit(emails.length);
+        this.loadingFinished.emit();
+        this.updateDisplayedEmails();
         this.isLoading = false;
       },
       error: (error) => {
+        this.loadingFinished.emit();
         this.isLoading = false;
       }
     });
   }
 
-  toggleStar(email: Email, event: Event) {
-    event.stopPropagation();
-    // If you want to toggle starred emails you can manually change:
-    email.isStarred = !email.isStarred;
+  updateDisplayedEmails() {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    this.emails = this.allEmails.slice(start, end);
   }
+  
+  ngOnChanges() {
+    this.updateDisplayedEmails();
+  }
+
+  refresh() {
+    this.refreshRequested.emit();
+    this.fetchEmails();
+  }
+
+  // toggleStar(email: Email, event: Event) {
+  //   event.stopPropagation();
+  //   email.isStarred = !email.isStarred;
+    
+  //   // Optional: Update the star status in backend
+  //   // this.emailService.updateStarStatus(email.id, email.isStarred).subscribe();
+  // }
 
   toggleEmailSelection(email: Email, event: Event) {
     event.stopPropagation();
     const index = this.selectedEmails.indexOf(email);
+    
     if (index === -1) {
       this.selectedEmails.push(email);
     } else {
@@ -61,20 +93,67 @@ export class PrimaryComponent implements OnInit {
   }
 
   archiveEmail(email: Email) {
-    console.log('Archive', email);
+    console.log('Archive email:', email);
+    // Implement archive functionality
+    // this.emailService.archiveEmail(email.id).subscribe();
   }
 
   deleteEmail(email: Email) {
-    console.log('Delete', email);
+    console.log('Delete email:', email);
+    // Implement delete functionality
+    // this.emailService.deleteEmail(email.id).subscribe();
   }
 
   markEmailAsRead(email: Email) {
-    console.log('Mark as Read', email);
+    console.log('Mark as read:', email);
+    email.isRead = true;
   }
 
   onEmailClick(email: Email) {
-    this.emailClicked.emit(email);
+    if (!email.isRead) {
+      this.emailService.markEmailAsRead(email.id, true).subscribe({
+        next: () => {
+          email.isRead = true;
+          this.selectedEmail = email;
+          this.emailClicked.emit(email);
+        }
+      });
+    } else {
+      this.selectedEmail = email;
+      this.emailClicked.emit(email);
+    }
   }
+  
+  toggleReadStatus(email: Email, event: Event) {
+    event.stopPropagation();
+  
+    const newStatus = !email.isRead;
+    this.emailService.markEmailAsRead(email.id, newStatus).subscribe({
+      next: () => {
+        email.isRead = newStatus;
+        console.log(`Email marked as ${newStatus ? 'read' : 'unread'}`);
+      },
+      error: err => console.error('Failed to toggle read status', err)
+    });
+  }
+
+  toggleStar(email: Email, event: Event) {
+    event.stopPropagation();
+    const newStatus = !email.isStarred;
+  
+    this.emailService.starred(email.id, newStatus).subscribe({
+      next: () => {
+        email.isStarred = newStatus;
+        console.log(`Email ${newStatus ? 'starred' : 'unstarred'}`);
+      },
+      error: err => console.error('Failed to toggle star status', err)
+    });
+  }
+  
+
+  goBackToTable() {
+    this.selectedEmail = null;
+  }  
 
   createRipple(event: MouseEvent) {
     const button = event.currentTarget as HTMLElement;
@@ -91,6 +170,7 @@ export class PrimaryComponent implements OnInit {
     if (ripple) {
       ripple.remove();
     }
+    
     button.appendChild(circle);
   }
 }

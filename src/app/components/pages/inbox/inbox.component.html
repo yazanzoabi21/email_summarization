@@ -1,7 +1,7 @@
 <div class="inbox-container">
   <div [@fadeSlideAnimation]="selectedEmail ? 'email' : 'inbox'">
     <ng-container *ngIf="!selectedEmail; else emailDetailView">
-      <div class="d-flex align-items-center justify-content-between px-3 py-2 bg-white border-bottom">
+      <div class="top-bar d-flex align-items-center justify-content-between px-3 py-2 bg-white border-bottom">
         <div class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center gap-2">
             <ng-container *ngIf="selectedEmails.length > 0; else defaultHeader">
@@ -18,7 +18,7 @@
 
             <ng-template #defaultHeader>
               <!-- your existing dropdown + refresh button + more button -->
-              <div class="dropdown">
+              <!-- <div class="dropdown">
                 <div class="d-flex align-items-center icon-button gap-1" data-bs-toggle="dropdown" role="button">
                   <input class="form-check-input m-0" type="checkbox" />
                   <i class="fa fa-caret-down"></i>
@@ -29,13 +29,13 @@
                   <li><a class="dropdown-item" (click)="selectRead()">Read</a></li>
                   <li><a class="dropdown-item" (click)="selectUnread()">Unread</a></li>
                 </ul>
-              </div>
+              </div> -->
 
               <div class="icon-button ms-2" (click)="refresh()" title="Refresh">
                 <i class="fa fa-refresh"></i>
               </div>
 
-              <div class="dropdown ms-2">
+              <!-- <div class="dropdown ms-2">
                 <div class="icon-button" data-bs-toggle="dropdown" role="button" title="More">
                   <i class="fa fa-ellipsis-v"></i>
                 </div>
@@ -46,7 +46,7 @@
                     </a>
                   </li>
                 </ul>
-              </div>
+              </div> -->
             </ng-template>
           </div>
         </div>
@@ -58,64 +58,81 @@
         </div> -->
 
         <div class="d-flex align-items-center gap-2 text-muted small">
-          <span>{{ (currentPage - 1) * itemsPerPage + 1 }}–{{ currentPage * itemsPerPage > totalItems ? totalItems :
-            currentPage * itemsPerPage }} of {{ totalItems }}</span>
-          <i class="fa fa-chevron-left icon-button" (click)="prevPage()" [class.disabled]="currentPage === 1"></i>
-          <i class="fa fa-chevron-right icon-button" (click)="nextPage()"
-            [class.disabled]="currentPage * itemsPerPage >= totalItems"></i>
+          <div *ngIf="paginationLoading" class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+
+          <span *ngIf="!paginationLoading">
+            {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ currentPage * itemsPerPage > totalItems ? totalItems :
+            currentPage * itemsPerPage }} of {{ totalItems }}
+          </span>
+
+          <i *ngIf="!paginationLoading" class="fa fa-chevron-left icon-button" (click)="prevPage()"
+            [class.disabled]="currentPage === 1">
+          </i>
+          <i *ngIf="!paginationLoading" class="fa fa-chevron-right icon-button" (click)="nextPage()"
+            [class.disabled]="currentPage * itemsPerPage >= totalItems">
+          </i>
         </div>
       </div>
 
       <div class="category-tabs d-flex align-items-center gap-4 border-bottom bg-white">
-        <div class="tab" [class.active]="activeTab === 'primary'" (click)="activeTab = 'primary'">
-          <i class="fa fa-inbox me-2"></i> Primary
+        <div class="category-tabs justify-content-center">
+          <div class="tab" [class.active]="activeTab === 'composed'" (click)="switchTab('composed')">
+            <i class="fa-solid fa-file-pen me-2"></i> Composed
+          </div>
+
+          <div class="tab" [class.active]="activeTab === 'receives'" (click)="switchTab('receives')">
+            <i class="fa-solid fa-envelope-open me-2"></i> Receives
+          </div>
         </div>
-        <div class="tab" [class.active]="activeTab === 'receives'" (click)="activeTab = 'receives'">
-          <i class="fa-solid fa-envelope-open me-2"></i> receives
-        </div>
-        <div class="tab" [class.active]="activeTab === 'promotions'" (click)="activeTab = 'promotions'">
+
+        <!-- <div class="tab" [class.active]="activeTab === 'promotions'" (click)="activeTab = 'promotions'">
           <i class="fa fa-tag me-2"></i> Promotions
         </div>
+
         <div class="tab d-flex align-items-center" [class.active]="activeTab === 'social'"
           (click)="activeTab = 'social'">
           <i class="fa fa-users me-2"></i> Social
-          <span class="badge rounded-pill ms-2 bg-primary">3 new</span>
+          <span class="badge rounded-pill ms-2 bg-primary">0 new</span>
         </div>
+
         <div class="tab d-flex align-items-center" [class.active]="activeTab === 'updates'"
           (click)="activeTab = 'updates'">
           <i class="fa fa-info-circle me-2"></i> Updates
-          <span class="badge rounded-pill ms-2 bg-warning text-dark">7 new</span>
-        </div>
-      </div>
-
-      <div class="" *ngIf="activeTab === 'primary'">
-        <app-primary [emails]="emails" (emailClicked)="openEmail($event)"></app-primary>
-      </div>
-
-      <div class="" *ngIf="activeTab === 'receives'">
-        <!-- <div class="text-center p-5 text-muted">
-          <p>Receive content will be displayed here</p>
+          <span class="badge rounded-pill ms-2 bg-warning text-dark">0 new</span>
         </div> -->
-        <app-receive></app-receive>
       </div>
 
-      <div class="" *ngIf="activeTab === 'promotions'">
+      <div *ngIf="activeTab === 'composed'">
+        <app-primary [hidden]="activeTab !== 'composed'" [currentPage]="currentPage" [itemsPerPage]="itemsPerPage"
+          (totalItemsChanged)="totalItems = $event" #primaryComponent (loadingFinished)="paginationLoading = false">
+        </app-primary>
+      </div>
+
+      <div *ngIf="activeTab === 'receives'">
+        <app-receive [hidden]="activeTab !== 'receives'" [currentPage]="currentPage" [itemsPerPage]="itemsPerPage"
+          (totalItemsChanged)="totalItems = $event" #receiveComponent (loadingFinished)="paginationLoading = false">
+        </app-receive>
+      </div>
+
+      <!-- <div *ngIf="activeTab === 'promotions'">
         <div class="text-center p-5 text-muted">
           <p>Promotions content will be displayed here</p>
         </div>
       </div>
 
-      <div class="" *ngIf="activeTab === 'social'">
+      <div *ngIf="activeTab === 'social'">
         <div class="text-center p-5 text-muted">
           <p>Social content will be displayed here</p>
         </div>
       </div>
 
-      <div class="" *ngIf="activeTab === 'updates'">
+      <div *ngIf="activeTab === 'updates'">
         <div class="text-center p-5 text-muted">
           <p>Updates content will be displayed here</p>
         </div>
-      </div>
+      </div> -->
     </ng-container>
 
     <ng-template #emailDetailView>

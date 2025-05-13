@@ -1,38 +1,99 @@
-<div [@fadeSlideAnimation]="selectedEmail ? 'email' : 'inbox'">
-    <div class="email-list" *ngIf="!selectedEmail; else emailDetail">
-        <div class="email-item" *ngFor="let email of starredEmails" (click)="onEmailClick(email)">
-            <div class="checkbox-star d-flex align-items-center">
-                <input type="checkbox" class="form-check-input m-0"
-                    (click)="toggleEmailSelection($event); $event.stopPropagation()" />
-                <i class="fa-star small-icon"
-                    [ngClass]="{ 'fa-solid text-warning': email.isStarred, 'fa-regular': !email.isStarred }"
-                    (click)="toggleStar(email, $event); $event.stopPropagation()">
-                </i>
+<!-- <div class="email-container" [@fadeSlideAnimation]="selectedEmail ? 'email' : 'inbox'">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <button class="btn btn-outline-secondary" (click)="refresh()" title="Refresh">
+            <i class="fa fa-sync-alt"></i>
+        </button>
+
+        <div class="d-flex align-items-center gap-2 text-muted small">
+            <div *ngIf="paginationLoading" class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
 
-            <div class="email-sender">{{ email.sender }}</div>
+            <span *ngIf="!paginationLoading">
+                {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ currentPage * itemsPerPage > totalItems ? totalItems :
+                currentPage * itemsPerPage }} of {{ totalItems }}
+            </span>
 
-            <div class="email-subject-preview">
-                <span class="email-label">Inbox</span>
-                <span class="email-subject">{{ email.subject }}</span>
-                <span class="email-preview"> - {{ email.preview }}</span>
-            </div>
-
-            <div class="email-time">{{ email.time }}</div>
-
-            <div class="email-actions">
-                <button class="action-button" (click)="archiveEmail(email); $event.stopPropagation()" title="Archive">
-                    <i class="fa-solid fa-box-archive"></i>
-                </button>
-                <button class="action-button" (click)="deleteEmail(email); $event.stopPropagation()" title="Delete">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-                <button class="action-button" (click)="markEmailAsRead(email); $event.stopPropagation()"
-                    title="Mark as Read">
-                    <i class="fa-regular fa-envelope-open"></i>
-                </button>
-            </div>
+            <i *ngIf="!paginationLoading" class="fa fa-chevron-left icon-button" (click)="prevPage()"
+                [class.disabled]="currentPage === 1">
+            </i>
+            <i *ngIf="!paginationLoading" class="fa fa-chevron-right icon-button" (click)="nextPage()"
+                [class.disabled]="currentPage * itemsPerPage >= totalItems">
+            </i>
         </div>
+    </div>
+
+    <div *ngIf="!selectedEmail; else emailDetail" class="table-responsive">
+        <table class="table table-hover email-table align-middle text-center">
+            <thead class="thead-light">
+                <tr>
+                    <th style="width: 5%"></th>
+                    <th style="width: 5%"></th>
+                    <th style="width: 10%">Subject</th>
+                    <th style="width: 10%">Recipient</th>
+                    <th style="width: 10%">Message</th>
+                    <th style="width: 10%">Time</th>
+                    <th style="width: 5%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let email of starredEmails" [ngClass]="{ read: email.isRead, unread: !email.isRead }"
+                    (click)="onEmailClick(email)" style="cursor: pointer">
+                    <td>
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" class="form-check-input"
+                                (click)="toggleEmailSelection(email, $event)"
+                                [checked]="selectedEmails.includes(email)" />
+                        </div>
+                    </td>
+                    <td>
+                        <div class="star-wrapper">
+                            <button class="btn btn-icon btn-star-status" title="Toggle Star"
+                                (click)="toggleStar(email, $event)">
+                                <i class="fa-star" [class.fa-solid]="email.isStarred"
+                                    [class.fa-regular]="!email.isStarred" [class.text-warning]="email.isStarred"
+                                    [class.text-secondary]="!email.isStarred"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td>
+                        {{
+                        email.subject
+                        ? email.subject.length > 10
+                        ? (email.subject | slice : 0 : 10) + '...'
+                        : email.subject
+                        : '-'
+                        }}
+                    </td>
+                    <td>{{ email.recipient }}</td>
+                    <td class="email-content">
+                        {{
+                        email.preview
+                        ? email.preview.length > 25
+                        ? (email.preview | slice : 0 : 25) + '...'
+                        : email.preview
+                        : '-'
+                        }}
+                    </td>
+                    <td class="email-time">{{ email.time }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn btn-icon btn-read-status" title="Toggle Read"
+                                (click)="markEmailAsRead(email); $event.stopPropagation()">
+                                <i class="fa-solid" [class.fa-envelope-open]="email.isRead"
+                                    [class.fa-envelope]="!email.isRead"
+                                    [ngClass]="email.isRead ? 'text-success' : 'text-secondary'"></i>
+                            </button>
+
+                            <button class="btn btn-icon btn-danger" title="Delete"
+                                (click)="deleteEmail(email); $event.stopPropagation()">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <ng-template #emailDetail>
@@ -41,7 +102,6 @@
                 <button class="btn btn-light mb-3" (click)="closeEmail()">
                     <i class="fa fa-arrow-left"></i> Back
                 </button>
-
                 <h4 class="mb-2">{{ selectedEmail?.subject }}</h4>
                 <p class="text-muted mb-2">From: {{ selectedEmail?.sender }}</p>
                 <p>{{ selectedEmail?.preview }}</p>
@@ -49,4 +109,79 @@
             </div>
         </div>
     </ng-template>
+</div> -->
+
+<div class="inbox-container">
+    <div [@fadeSlideAnimation]="selectedEmail ? 'email' : 'inbox'">
+        <ng-container *ngIf="!selectedEmail; else emailDetailView">
+            <div class="top-bar d-flex align-items-center justify-content-between px-3 py-2 bg-white border-bottom">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="icon-button ms-2" (click)="refresh()" title="Refresh">
+                        <i class="fa fa-refresh"></i>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 text-muted small">
+                    <div *ngIf="paginationLoading" class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+
+                    <span *ngIf="!paginationLoading">
+                        {{ (currentPage - 1) * itemsPerPage + 1 }}–{{ currentPage * itemsPerPage > totalItems ?
+                        totalItems : currentPage * itemsPerPage }} of {{ totalItems }}
+                    </span>
+
+                    <i *ngIf="!paginationLoading" class="fa fa-chevron-left icon-button" (click)="prevPage()"
+                        [class.disabled]="currentPage === 1"></i>
+                    <i *ngIf="!paginationLoading" class="fa fa-chevron-right icon-button" (click)="nextPage()"
+                        [class.disabled]="currentPage * itemsPerPage >= totalItems"></i>
+                </div>
+            </div>
+
+            <div class="category-tabs d-flex align-items-center gap-4 border-bottom bg-white">
+                <div class="category-tabs justify-content-center">
+                    <div class="tab" [class.active]="activeTab === 'composed'" (click)="switchTab('composed')">
+                        <i class="fa-solid fa-file-pen me-2"></i> Composed
+                    </div>
+
+                    <div class="tab" [class.active]="activeTab === 'receives'" (click)="switchTab('receives')">
+                        <i class="fa-solid fa-envelope-open me-2"></i> Receives
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="activeTab === 'composed'">
+                <app-primary [hidden]="activeTab !== 'composed'" [currentPage]="currentPage"
+                    [itemsPerPage]="itemsPerPage" (totalItemsChanged)="totalItems = $event" #primaryComponent
+                    (loadingFinished)="paginationLoading = false">
+                </app-primary>
+            </div>
+
+            <div *ngIf="activeTab === 'receives'">
+                <app-receive [hidden]="activeTab !== 'receives'" [currentPage]="currentPage"
+                    [itemsPerPage]="itemsPerPage" (totalItemsChanged)="totalItems = $event" #receiveComponent
+                    (loadingFinished)="paginationLoading = false">
+                </app-receive>
+            </div>
+        </ng-container>
+
+        <ng-template #emailDetailView>
+            <div class="email-detail-card">
+                <div class="d-flex align-items-center mb-3">
+                    <button class="btn btn-light btn-sm" (click)="closeEmail()">
+                        <i class="fa fa-arrow-left"></i> Back
+                    </button>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <h4 class="email-subject">{{ selectedEmail?.subject }}</h4>
+                    <span class="email-label">Starred</span>
+                </div>
+
+                <p class="email-from">From: {{ selectedEmail?.sender }}</p>
+                <p class="email-preview-text">{{ selectedEmail?.preview }}</p>
+                <p class="email-time-text">{{ selectedEmail?.time }}</p>
+            </div>
+        </ng-template>
+    </div>
 </div>

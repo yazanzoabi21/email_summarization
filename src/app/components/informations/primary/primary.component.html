@@ -1,118 +1,131 @@
-<!-- <div *ngFor="let email of emails" (click)="onEmailClick(email)" class="email-item"
-        [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }">
-        (mouseenter)="email.hover = true"
-        (mouseleave)="email.hover = false"
+<div class="email-container">
+    <div *ngIf="isLoading" class="alert alert-info text-center mt-3 mx-3">
+        Loading emails...
+    </div>
 
-        <div class="checkbox-star d-flex align-items-center" style="width: 40px;">
-            <input type="checkbox" class="form-check-input m-0"
-                (click)="toggleEmailSelection(email, $event); $event.stopPropagation()"
-                [checked]="selectedEmails.includes(email)" />
+    <div *ngIf="emails.length === 0 && !isLoading" class="empty-state">
+        <i class="fa-regular fa-envelope empty-icon"></i>
+        <p class="empty-text">No emails found !</p>
+    </div>
 
-            <i class="fa-regular fa-star small-icon" (click)="toggleStar(email, $event); $event.stopPropagation()"
-                [ngClass]="{
-                'fa-regular': !email.isStarred,
-                'fa-solid text-warning': email.isStarred
-              }">
-            </i>
-        </div>
+    <div class="table-responsive" *ngIf="!isLoading && emails.length > 0">
+        <ng-container *ngIf="!selectedEmail; else detailView">
+            <table class="table table-hover email-table align-middle text-center">
+                <thead class="thead-light">
+                    <tr>
+                        <th style="width: 5%"></th>
+                        <th style="width: 5%"></th>
+                        <th style="width: 10%">Subject</th>
+                        <th style="width: 10%">Recipient</th>
+                        <th style="width: 10%">Message</th>
+                        <th style="width: 10%">Time</th>
+                        <th style="width: 10%">Status</th>
+                        <th style="width: 5%"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let email of emails" [ngClass]="{ read: email.isRead, unread: !email.isRead }"
+                        (click)="onEmailClick(email)" style="cursor: pointer">
+                        <td>
+                            <div class="checkbox-wrapper">
+                                <input type="checkbox" class="form-check-input"
+                                    (click)="toggleEmailSelection(email, $event)"
+                                    [checked]="selectedEmails.includes(email)" />
+                            </div>
+                        </td>
+                        <td>
+                            <div class="star-wrapper">
+                                <button class="btn btn-icon btn-star-status" title="Toggle Star"
+                                    (click)="toggleStar(email, $event)">
+                                    <i class="fa-star" [class.fa-solid]="email.isStarred"
+                                        [class.fa-regular]="!email.isStarred" [class.text-warning]="email.isStarred"
+                                        [class.text-secondary]="!email.isStarred">
+                                    </i>
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            {{
+                            email.subject
+                            ? email.subject.length > 10
+                            ? (email.subject | slice : 0 : 10) + "..."
+                            : email.subject
+                            : "-"
+                            }}
+                        </td>
+                        <td>{{ email.recipient }}</td>
+                        <td class="email-content">
+                            {{
+                            email.preview
+                            ? email.preview.length > 25
+                            ? (email.preview | slice : 0 : 25) + "..."
+                            : email.preview
+                            : "-"
+                            }}
+                        </td>
+                        <td class="email-time">{{ email.time }}</td>
+                        <td>
+                            <span class="status-badge" [ngClass]="{
+                    'status-sent': email.status === 'sent',
+                    'status-pending': email.status === 'pending',
+                    'status-unsent': email.status === 'unsent'
+                  }">
+                                {{ email.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-icon btn-read-status" title="Read Email"
+                                    (click)="toggleReadStatus(email, $event)">
+                                    <i class="fa-solid" [class.fa-envelope-open]="email.isRead"
+                                        [class.fa-envelope]="!email.isRead"
+                                        [ngClass]="email.isRead ? 'text-success' : 'text-secondary'"></i>
+                                </button>
 
-        <div class="email-sender text-truncate">{{ email.sender }}</div>
+                                <button class="btn btn-icon btn-danger" title="Delete Email"
+                                    (click)="deleteEmail(email); $event.stopPropagation()">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </ng-container>
 
-        <div class="email-subject-preview flex-grow-1 d-flex align-items-center">
-            <span class="email-subject fw-bold text-truncate">{{ email.subject }}</span>
-            <span class="email-preview text-muted text-truncate"> - {{ email.preview }}</span>
-        </div>
+        <ng-template #detailView>
+            <div class="email-detail-card p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <button class="btn btn-outline-success btn-sm" (click)="goBackToTable()">
+                        <i class="fa fa-arrow-left me-2"></i> Back
+                    </button>
+                </div>
 
-        <div class="email-time text-muted text-end">{{ email.time }}</div>
-
-        *ngIf="email.hover"
-        <div class="email-actions d-flex align-items-center">
-            <button class="icon-button" (click)="archiveEmail(email)" (mousedown)="createRipple($event)">
-                <i class="fa-solid fa-box-archive"></i>
-            </button>
-            <button class="icon-button" (click)="deleteEmail(email)" (mousedown)="createRipple($event)">
-                <i class="fa-solid fa-trash"></i>
-            </button>
-            <button class="icon-button" (click)="markEmailAsRead(email)" (mousedown)="createRipple($event)">
-                <i class="fa-regular fa-envelope-open"></i>
-            </button>
-        </div>
-    </div> -->
-
-<div class="email-table-wrapper">
-    <div class="table-responsive">
-
-        <div *ngIf="isLoading" class="alert alert-info text-center mt-3 mx-3">
-            Loading emails...
-        </div>
-
-        <div *ngIf="emails.length === 0 && !isLoading" class="text-center p-5 text-muted">
-            <p>No emails found</p>
-        </div>
-
-        <table *ngIf="!isLoading" class="table table-hover mb-0">
-            <thead>
-                <tr>
-                    <th scope="col">
-                        <!-- <input type="checkbox" /> -->
-                    </th>
-                    <th scope="col"></th>
-                    <th scope="col">Subject</th>
-                    <!-- <th scope="col">Sender</th> -->
-                    <th scope="col">recipient</th>
-                    <th scope="col">Message</th>
-                    <th scope="col">Time</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let email of emails" (click)="onEmailClick(email)"
-                    [ngClass]="{ 'read': email.isRead, 'unread': !email.isRead }" style="cursor: pointer;">
-                    <td>
-                        <input type="checkbox" class="form-check-input" (click)="toggleEmailSelection(email, $event)"
-                            [checked]="selectedEmails.includes(email)" style="cursor: pointer;" />
-                    </td>
-                    <td>
-                        <i class="fa-regular fa-star" (click)="toggleStar(email, $event); $event.stopPropagation()"
-                            [ngClass]="{
-                      'fa-regular': !email.isStarred,
-                      'fa-solid text-warning': email.isStarred
-                    }">
-                        </i>
-                    </td>
-                    <td>{{ email.subject }}</td>
-                    <!-- <td>{{ email.sender }}</td> -->
-                    <td>{{ email.recipient }}</td>
-                    <td>{{ email.preview }}</td>
-                    <td>{{ email.time }}</td>
-                    <td>
-                        <span class="badge text-capitalize d-inline-block py-2 px-3 fw-bold" [ngClass]="{
-                            'bg-success': email.status === 'sent',
-                            'bg-warning text-dark': email.status === 'pending',
-                            'bg-danger': email.status === 'unsent'
-                          }" style="font-size: 0.85rem; min-width: 80px; text-align: center; border-radius: 8px;">
-                            {{ email.status }}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="d-flex align-items-center gap-1">
-                            <button class="btn btn-sm btn-outline-secondary p-1" (click)="archiveEmail(email)"
-                                (mousedown)="createRipple($event)">
-                                <i class="fa-solid fa-box-archive"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger p-1" (click)="deleteEmail(email)"
-                                (mousedown)="createRipple($event)">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-primary p-1" (click)="markEmailAsRead(email)"
-                                (mousedown)="createRipple($event)">
-                                <i class="fa-regular fa-envelope-open"></i>
-                            </button>
+                <div class="d-flex justify-content-center">
+                    <div class="email-content">
+                        <div class="mb-3">
+                            <h4 class="fw-bold">{{ selectedEmail?.subject || 'No Subject' }}</h4>
+                            <p><strong>To:</strong> {{ selectedEmail?.recipient }}</p>
+                            <p>
+                                <strong>Status:</strong>
+                                <span class="status-badge ms-2" [ngClass]="{
+                                    'status-sent': selectedEmail?.status === 'sent',
+                                    'status-pending': selectedEmail?.status === 'pending',
+                                    'status-unsent': selectedEmail?.status === 'unsent'
+                                  }">
+                                    {{ selectedEmail?.status }}
+                                </span>
+                            </p>
+                            <p><strong>Time:</strong> {{ selectedEmail?.time }}</p>
                         </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+
+                        <div>
+                            <p><strong>Message:</strong></p>
+                            <p>{{ selectedEmail?.preview || 'No content available.' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template>
     </div>
 </div>
