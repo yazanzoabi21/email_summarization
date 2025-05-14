@@ -61,17 +61,17 @@ export class EmailService {
   }
 
   // mark as read
-  markEmailAsRead(id: number, isRead: boolean): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+  // markEmailAsRead(id: number, isRead: boolean): Observable<any> {
+  //   const token = localStorage.getItem('token');
+  //   const headers = new HttpHeaders({
+  //     'Content-Type': 'application/json',
+  //     'Authorization': `Bearer ${token}`
+  //   });
 
-    const body = { is_read: isRead };
+  //   const body = { is_read: isRead };
   
-    return this.http.put(`${environment.apiUrl}email/mark-as-read/${id}`, body, { headers });
-  }
+  //   return this.http.put(`${environment.apiUrl}email/mark-as-read/${id}`, body, { headers });
+  // }
 
   markReceivedEmailAsRead(emailId: string, isRead: boolean): Observable<any> {
     const token = localStorage.getItem('token');

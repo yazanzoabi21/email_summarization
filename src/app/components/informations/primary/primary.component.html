@@ -13,7 +13,7 @@
             <table class="table table-hover email-table align-middle text-center">
                 <thead class="thead-light">
                     <tr>
-                        <th style="width: 5%"></th>
+                        <!-- <th style="width: 5%"></th> -->
                         <th style="width: 5%"></th>
                         <th style="width: 10%">Subject</th>
                         <th style="width: 10%">Recipient</th>
@@ -24,15 +24,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let email of emails" [ngClass]="{ read: email.isRead, unread: !email.isRead }"
-                        (click)="onEmailClick(email)" style="cursor: pointer">
-                        <td>
+                    <tr *ngFor="let email of emails" (click)="onEmailClick(email)" style="cursor: pointer">
+                        <!-- <td>
                             <div class="checkbox-wrapper">
                                 <input type="checkbox" class="form-check-input"
                                     (click)="toggleEmailSelection(email, $event)"
                                     [checked]="selectedEmails.includes(email)" />
                             </div>
-                        </td>
+                        </td> -->
                         <td>
                             <div class="star-wrapper">
                                 <button class="btn btn-icon btn-star-status" title="Toggle Star"
@@ -66,21 +65,21 @@
                         <td class="email-time">{{ email.time }}</td>
                         <td>
                             <span class="status-badge" [ngClass]="{
-                    'status-sent': email.status === 'sent',
-                    'status-pending': email.status === 'pending',
-                    'status-unsent': email.status === 'unsent'
-                  }">
+                  'status-sent': email.status === 'sent',
+                  'status-pending': email.status === 'pending',
+                  'status-unsent': email.status === 'unsent'
+                }">
                                 {{ email.status }}
                             </span>
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <button class="btn btn-icon btn-read-status" title="Read Email"
+                                <!-- <button class="btn btn-icon btn-read-status" title="Read Email"
                                     (click)="toggleReadStatus(email, $event)">
                                     <i class="fa-solid" [class.fa-envelope-open]="email.isRead"
                                         [class.fa-envelope]="!email.isRead"
                                         [ngClass]="email.isRead ? 'text-success' : 'text-secondary'"></i>
-                                </button>
+                                </button> -->
 
                                 <button class="btn btn-icon btn-danger" title="Delete Email"
                                     (click)="deleteEmail(email); $event.stopPropagation()">
@@ -104,15 +103,17 @@
                 <div class="d-flex justify-content-center">
                     <div class="email-content">
                         <div class="mb-3">
-                            <h4 class="fw-bold">{{ selectedEmail?.subject || 'No Subject' }}</h4>
+                            <h4 class="fw-bold">
+                                {{ selectedEmail?.subject || "No Subject" }}
+                            </h4>
                             <p><strong>To:</strong> {{ selectedEmail?.recipient }}</p>
                             <p>
                                 <strong>Status:</strong>
                                 <span class="status-badge ms-2" [ngClass]="{
-                                    'status-sent': selectedEmail?.status === 'sent',
-                                    'status-pending': selectedEmail?.status === 'pending',
-                                    'status-unsent': selectedEmail?.status === 'unsent'
-                                  }">
+                    'status-sent': selectedEmail?.status === 'sent',
+                    'status-pending': selectedEmail?.status === 'pending',
+                    'status-unsent': selectedEmail?.status === 'unsent'
+                  }">
                                     {{ selectedEmail?.status }}
                                 </span>
                             </p>
@@ -121,7 +122,7 @@
 
                         <div>
                             <p><strong>Message:</strong></p>
-                            <p>{{ selectedEmail?.preview || 'No content available.' }}</p>
+                            <p>{{ selectedEmail?.preview || "No content available." }}</p>
                         </div>
                     </div>
                 </div>

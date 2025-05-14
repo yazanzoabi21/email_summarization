@@ -73,14 +73,6 @@ export class PrimaryComponent implements OnInit {
     this.fetchEmails();
   }
 
-  // toggleStar(email: Email, event: Event) {
-  //   event.stopPropagation();
-  //   email.isStarred = !email.isStarred;
-    
-  //   // Optional: Update the star status in backend
-  //   // this.emailService.updateStarStatus(email.id, email.isStarred).subscribe();
-  // }
-
   toggleEmailSelection(email: Email, event: Event) {
     event.stopPropagation();
     const index = this.selectedEmails.indexOf(email);
@@ -94,48 +86,48 @@ export class PrimaryComponent implements OnInit {
 
   archiveEmail(email: Email) {
     console.log('Archive email:', email);
-    // Implement archive functionality
-    // this.emailService.archiveEmail(email.id).subscribe();
   }
 
   deleteEmail(email: Email) {
     console.log('Delete email:', email);
-    // Implement delete functionality
-    // this.emailService.deleteEmail(email.id).subscribe();
   }
 
-  markEmailAsRead(email: Email) {
-    console.log('Mark as read:', email);
-    email.isRead = true;
-  }
+  // markEmailAsRead(email: Email) {
+  //   email.isRead = true;
+  // }
+
+  // onEmailClick(email: Email) {
+  //   if (!email.isRead) {
+  //     this.emailService.markEmailAsRead(email.id, true).subscribe({
+  //       next: () => {
+  //         email.isRead = true;
+  //         this.selectedEmail = email;
+  //         this.emailClicked.emit(email);
+  //       }
+  //     });
+  //   } else {
+  //     this.selectedEmail = email;
+  //     this.emailClicked.emit(email);
+  //   }
+  // }
 
   onEmailClick(email: Email) {
-    if (!email.isRead) {
-      this.emailService.markEmailAsRead(email.id, true).subscribe({
-        next: () => {
-          email.isRead = true;
-          this.selectedEmail = email;
-          this.emailClicked.emit(email);
-        }
-      });
-    } else {
-      this.selectedEmail = email;
-      this.emailClicked.emit(email);
-    }
-  }
+  this.selectedEmail = email;
+  this.emailClicked.emit(email);
+}
   
-  toggleReadStatus(email: Email, event: Event) {
-    event.stopPropagation();
+  // toggleReadStatus(email: Email, event: Event) {
+  //   event.stopPropagation();
   
-    const newStatus = !email.isRead;
-    this.emailService.markEmailAsRead(email.id, newStatus).subscribe({
-      next: () => {
-        email.isRead = newStatus;
-        console.log(`Email marked as ${newStatus ? 'read' : 'unread'}`);
-      },
-      error: err => console.error('Failed to toggle read status', err)
-    });
-  }
+  //   const newStatus = !email.isRead;
+  //   this.emailService.markEmailAsRead(email.id, newStatus).subscribe({
+  //     next: () => {
+  //       email.isRead = newStatus;
+  //       console.log(`Email marked as ${newStatus ? 'read' : 'unread'}`);
+  //     },
+  //     error: err => console.error('Failed to toggle read status', err)
+  //   });
+  // }
 
   toggleStar(email: Email, event: Event) {
     event.stopPropagation();
