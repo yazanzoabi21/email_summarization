@@ -130,29 +130,28 @@
     gap: 8px;
 
     .btn-icon {
-      width: 30px;
-      height: 30px;
-      padding: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: transparent;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 16px;
-      border-radius: 50%;
       transition: all 0.2s ease;
-
-      i {
-        pointer-events: none;
-      }
+      border: none;
 
       &.btn-delete {
-        background-color: #fee2e2;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        background-color: transparent;
+
+        i {
+          color: #dc3545; // Red
+          pointer-events: none;
+        }
 
         &:hover {
-          background-color: #fecaca;
-          transform: translateY(-2px);
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+          background-color: #f8d7da; // Soft red background on hover
+          transform: scale(1.05);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
       }
 
@@ -206,6 +205,29 @@
       strong {
         color: #1e293b;
       }
+    }
+  }
+}
+
+.email-detail-wrapper {
+  max-width: 900px;
+  // margin: auto;
+
+  .email-detail-card {
+    border: 1px solid #e2e8f0;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+
+    .message-box {
+      background-color: #ffffff;
+      border: 1px solid #ced4da;
+      font-size: 1rem;
+      color: #334155;
+    }
+
+    p {
+      color: #1e293b;
     }
   }
 }

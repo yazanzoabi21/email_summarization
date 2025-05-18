@@ -1,6 +1,6 @@
 <div class="email-container">
     <div *ngIf="isLoading" class="alert alert-info text-center mt-3 mx-3">
-        Loading emails...
+        <i class="fa-solid fa-spinner fa-spin me-2"></i> Loading emails...
     </div>
 
     <div *ngIf="emails.length === 0 && !isLoading" class="empty-state">
@@ -14,24 +14,18 @@
                 <thead class="thead-light">
                     <tr>
                         <!-- <th style="width: 5%"></th> -->
-                        <th style="width: 5%"></th>
-                        <th style="width: 10%">Subject</th>
-                        <th style="width: 10%">Recipient</th>
+                        <th style="width: 2%"></th>
+                        <th style="width: 20%">Details</th>
+                        <th style="width: 5%">Subject</th>
+                        <!-- <th style="width: 10%">Recipient</th> -->
                         <th style="width: 10%">Message</th>
-                        <th style="width: 10%">Time</th>
-                        <th style="width: 10%">Status</th>
-                        <th style="width: 5%"></th>
+                        <th style="width: 5%">Date</th>
+                        <th style="width: 5%">Status</th>
+                        <th style="width: 2%"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr *ngFor="let email of emails" (click)="onEmailClick(email)" style="cursor: pointer">
-                        <!-- <td>
-                            <div class="checkbox-wrapper">
-                                <input type="checkbox" class="form-check-input"
-                                    (click)="toggleEmailSelection(email, $event)"
-                                    [checked]="selectedEmails.includes(email)" />
-                            </div>
-                        </td> -->
                         <td>
                             <div class="star-wrapper">
                                 <button class="btn btn-icon btn-star-status" title="Toggle Star"
@@ -43,47 +37,68 @@
                                 </button>
                             </div>
                         </td>
+
+                        <td>
+                            <strong>
+                                From:
+                                <ng-container *ngIf="email.sender; else onlyEmail">
+                                    {{ email.sender }}
+                                    <span class="text-muted">({{ email.sender_email }})</span>
+                                </ng-container>
+                                <ng-template #onlyEmail>
+                                    <span class="text-muted">{{ email.sender_email }}</span>
+                                </ng-template>
+                            </strong>
+                            <br />
+                            <small>
+                                To:
+                                <ng-container *ngIf="email.recipient; else onlyRecipientEmail">
+                                    {{ email.recipient }}
+                                    <span class="text-muted">({{ email.recipient_email }})</span>
+                                </ng-container>
+                                <ng-template #onlyRecipientEmail>
+                                    <span class="text-muted">{{ email.recipient_email }}</span>
+                                </ng-template>
+                            </small>
+                            <br />
+                            <ng-container *ngIf="(email.replyCount || 0) > 0">
+                                <span class="badge bg-primary">{{ email.replyCount }} Replies</span>
+                            </ng-container>
+                        </td>
+
+                        <td>
+                            {{ email.subject ? (email.subject.length > 10 ? (email.subject | slice : 0 : 10) + "..." :
+                            email.subject) : "-" }}
+                        </td>
+
+                        <td class="email-content">
+                            {{ email.preview ? (email.preview.length > 25 ? (email.preview | slice : 0 : 25) + "..." :
+                            email.preview) : "-" }}
+                        </td>
+
+                        <!-- <td class="email-time">{{ email.time }}</td> -->
                         <td>
                             {{
-                            email.subject
-                            ? email.subject.length > 10
-                            ? (email.subject | slice : 0 : 10) + "..."
-                            : email.subject
-                            : "-"
+                            email.date && email.time
+                            ? email.time + ' | ' + email.date
+                            : '-'
                             }}
                         </td>
-                        <td>{{ email.recipient }}</td>
-                        <td class="email-content">
-                            {{
-                            email.preview
-                            ? email.preview.length > 25
-                            ? (email.preview | slice : 0 : 25) + "..."
-                            : email.preview
-                            : "-"
-                            }}
-                        </td>
-                        <td class="email-time">{{ email.time }}</td>
+
                         <td>
                             <span class="status-badge" [ngClass]="{
-                  'status-sent': email.status === 'sent',
-                  'status-pending': email.status === 'pending',
-                  'status-unsent': email.status === 'unsent'
-                }">
+                                'status-sent': email.status === 'sent',
+                                'status-pending': email.status === 'pending',
+                                'status-unsent': email.status === 'unsent'}">
                                 {{ email.status }}
                             </span>
                         </td>
+
                         <td>
                             <div class="action-buttons">
-                                <!-- <button class="btn btn-icon btn-read-status" title="Read Email"
-                                    (click)="toggleReadStatus(email, $event)">
-                                    <i class="fa-solid" [class.fa-envelope-open]="email.isRead"
-                                        [class.fa-envelope]="!email.isRead"
-                                        [ngClass]="email.isRead ? 'text-success' : 'text-secondary'"></i>
-                                </button> -->
-
-                                <button class="btn btn-icon btn-danger" title="Delete Email"
+                                <button class="btn-icon btn-delete"
                                     (click)="deleteEmail(email); $event.stopPropagation()">
-                                    <i class="fa-solid fa-trash"></i>
+                                    <i class="fa-solid fa-trash-can fs-6"></i>
                                 </button>
                             </div>
                         </td>
@@ -92,7 +107,7 @@
             </table>
         </ng-container>
 
-        <ng-template #detailView>
+        <!-- <ng-template #detailView>
             <div class="email-detail-card p-4">
                 <div class="d-flex align-items-center mb-3">
                     <button class="btn btn-outline-success btn-sm" (click)="goBackToTable()">
@@ -124,6 +139,31 @@
                             <p><strong>Message:</strong></p>
                             <p>{{ selectedEmail?.preview || "No content available." }}</p>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </ng-template> -->
+        <ng-template #detailView>
+            <div class="card shadow-sm p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <button class="btn btn-outline-success btn-sm rounded" (click)="goBackToTable()">
+                        <i class="fa fa-arrow-left me-2"></i> Back
+                    </button>
+                </div>
+
+                <div class="p-4 border rounded bg-light ms-2">
+                    <h5 class="mb-1">
+                        <strong>Subject:</strong> {{ selectedEmail?.subject || 'No Subject' }}
+                    </h5>
+                    <p class="mb-1">
+                        <strong>To:</strong> {{ selectedEmail?.recipient_email }}
+                    </p>
+                    <p class="mb-1">
+                        <strong>Sent At:</strong> {{ selectedEmail?.time || '-' }}
+                    </p>
+                    <p class="mb-1"><strong>Message:</strong></p>
+                    <div class="message-box p-3 bg-white rounded border">
+                        {{ selectedEmail?.preview || 'No content available.' }}
                     </div>
                 </div>
             </div>

@@ -1,28 +1,81 @@
-<div class="container mt-4">
-    <h2><i class="fa-solid fa-paper-plane"></i> Sent Emails</h2>
+<div class="container mt-4 replied-table">
+    <h2 class="mb-3">
+        <i class="fa-solid fa-paper-plane me-2"></i>Replied Emails
+    </h2>
 
-    <div *ngIf="sentEmails.length === 0" class="alert alert-info text-center mt-4">
-        No sent emails yet.
+    <div *ngIf="selectedEmail; else emailList" class="card shadow-sm p-4">
+        <div class="d-flex align-items-center mb-3">
+            <button class="btn btn-outline-success btn-sm rounded" (click)="backToList()">
+                <i class="fa fa-arrow-left me-2"></i> Back
+            </button>
+        </div>
+
+        <div class="border rounded p-4 bg-light ms-2">
+            <h5 class="mb-3">
+                <strong>Subject:</strong> {{ selectedEmail.subject }}
+            </h5>
+            <p class="mb-1"><strong>To:</strong> {{ selectedEmail.recipient }}</p>
+            <p class="mb-1"><strong>Sent At:</strong> {{ selectedEmail.time }}</p>
+            <p class="mb-2"><strong>Message:</strong></p>
+            <div class="border rounded p-3 bg-white">{{ selectedEmail.body }}</div>
+        </div>
     </div>
 
-    <div *ngIf="sentEmails.length > 0" class="table-responsive">
-        <table class="table table-hover align-middle text-center">
-            <thead class="thead-light">
-                <tr>
-                    <th scope="col" style="width: 10%;">To</th>
-                    <th scope="col" style="width: 10%;">Subject</th>
-                    <th scope="col" style="width: 10%;">Body</th>
-                    <th scope="col" style="width: 10%;">Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let email of sentEmails">
-                    <td>{{ email.recipient }}</td>
-                    <td>{{ email.subject }}</td>
-                    <td>{{ email.body }}</td>
-                    <td>{{ email.time }}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <ng-template #emailList>
+        <div *ngIf="repliedEmails.length === 0 && !isLoading" class="alert alert-info text-center mt-4">
+            No replies sent yet.
+        </div>
+
+        <div *ngIf="repliedEmails.length > 0 || isLoading" class="table-wrapper bg-white rounded shadow-sm mt-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center mb-0 table-rounded">
+                    <thead class="table-light text-uppercase small">
+                        <tr>
+                            <th style="width: 1%;">
+                                <div class="icon-button ms-2" (click)="fetchRepliedEmails()" title="Refresh"
+                                    style="cursor: pointer;">
+                                    <i class="fa fa-refresh"></i>
+                                </div>
+                            </th>
+                            <th style="width: 10%;">To</th>
+                            <th style="width: 5%;">Subject</th>
+                            <th style="width: 10%;">Message</th>
+                            <th style="width: 5%;">Time</th>
+                            <th style="width: 5%;">Status</th>
+                            <th style="width: 2%;"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngIf="isLoading">
+                            <td colspan="7">
+                                <div class="alert alert-info text-center my-2 mb-0">
+                                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Loading emails...
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr *ngFor="let reply of repliedEmails" (click)="openEmailDetail(reply)" class="clickable-row">
+                            <td></td>
+                            <td>{{ reply.recipient }}</td>
+                            <td>{{ reply.subject | slice: 0:15 }}{{ reply.subject.length > 15 ? '...' : '' }}</td>
+                            <td>{{ reply.body | slice: 0:20 }}{{ reply.body.length > 20 ? '...' : '' }}</td>
+                            <td>{{ reply.time }}</td>
+                            <td>
+                                <span
+                                    class="badge bg-success bg-opacity-25 text-success px-3 py-1 rounded-pill fw-semibold">
+                                    Sent
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn-icon btn-delete" (click)="$event.stopPropagation()">
+                                    <i class="fa-solid fa-trash-can fs-6"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </ng-template>
 </div>

@@ -67,20 +67,22 @@ export class ComposeComponent {
     // ✅ 1. Create a pending email immediately
     const pendingEmail: Email = {
       id: Date.now(),
-      sender: '',
+      sender: 'You', // or your own email/name if known
+      sender_email: 'zohbiyazan@gmail.com', // optionally set this dynamically if logged-in user is available
       recipient: this.recipient,
+      recipient_email: this.recipient,
       subject: this.subject,
       preview: this.body.slice(0, 100),
       cc: this.cc,
       bcc: this.bcc,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'pending', // ✅ status pending
+      status: 'pending',
       isRead: false,
       isStarred: false,
       body: this.body,
     };
   
-    this.emailEventsService.emitPendingEmail(pendingEmail); // ✅ Emit pending immediately
+    this.emailEventsService.emitPendingEmail(pendingEmail);
   
     // ✅ 2. Now send the real email
     this.emailService.sendEmail(pendingEmail).subscribe({

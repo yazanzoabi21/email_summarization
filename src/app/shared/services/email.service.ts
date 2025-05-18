@@ -4,6 +4,8 @@ import { Email } from '../Interface/email';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { ReceivedEmail } from '../Interface/received-email';
+import { RepliedEmail } from '../Interface/replied-email';
+import { ReceivedEmailWithReplies } from '../Interface/received-email-with-replies';
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +50,20 @@ export class EmailService {
     );
   }
 
+  // add this method to EmailService
+  getEmailsWithReplies(): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.get<ReceivedEmailWithReplies[]>(
+      environment.apiUrl + 'email/threads', 
+      { headers }
+    );
+  }
+
   // reply email
   replyToEmail(replyData: any): Observable<any> {
     const token = localStorage.getItem('token');
@@ -60,50 +76,57 @@ export class EmailService {
     });
   }
 
-  // mark as read
-  // markEmailAsRead(id: number, isRead: boolean): Observable<any> {
-  //   const token = localStorage.getItem('token');
-  //   const headers = new HttpHeaders({
-  //     'Content-Type': 'application/json',
-  //     'Authorization': `Bearer ${token}`
-  //   });
+  getRepliedEmails(): Observable<RepliedEmail[]> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    });
 
-  //   const body = { is_read: isRead };
-  
-  //   return this.http.put(`${environment.apiUrl}email/mark-as-read/${id}`, body, { headers });
-  // }
+    return this.http.get<RepliedEmail[]>(`${environment.apiUrl}email/replies`, {
+      headers,
+    });
+  }
 
   markReceivedEmailAsRead(emailId: string, isRead: boolean): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
-  
+
     const body = { is_read: isRead };
-  
-    return this.http.put(`${environment.apiUrl}email/receive/mark-as-read/${emailId}`, body, { headers });
-  } 
-  
+
+    return this.http.put(
+      `${environment.apiUrl}email/receive/mark-as-read/${emailId}`,
+      body,
+      { headers }
+    );
+  }
+
   // starred
   starred(id: number, isStarred: boolean): Observable<any> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
-  
+
     const body = { is_starred: isStarred };
-    return this.http.put(`${environment.apiUrl}email/starred/${id}`, body, { headers });
+    return this.http.put(`${environment.apiUrl}email/starred/${id}`, body, {
+      headers,
+    });
   }
 
   getStarredEmails(): Observable<Email[]> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     });
-  
-    return this.http.get<Email[]>(`${environment.apiUrl}email/starred`, { headers });
-  }  
+
+    return this.http.get<Email[]>(`${environment.apiUrl}email/starred`, {
+      headers,
+    });
+  }
 }
