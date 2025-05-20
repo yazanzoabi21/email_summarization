@@ -47,21 +47,30 @@ export class PrimaryComponent implements OnInit {
 
     this.emailService.getEmails().subscribe({
       next: (emails) => {
-        // Fetch reply threads and map count
+        // Fetch grouped threads with replies
         this.emailService.getEmailsWithReplies().subscribe({
-          next: (threads: ReceivedEmailWithReplies[]) => {
+          next: (threads: {
+            [thread_id: string]: ReceivedEmailWithReplies[];
+          }) => {
             const replyCountMap: Record<string, number> = {};
 
-            for (const thread of threads) {
-              if (thread.thread_id) {
-                replyCountMap[thread.thread_id] = thread.replies?.length || 0;
+            // Loop over thread groups to build reply count map
+            for (const threadGroup of Object.values(threads)) {
+              for (const email of threadGroup) {
+                if (email.thread_id) {
+                  replyCountMap[email.thread_id] =
+                    (replyCountMap[email.thread_id] || 0) +
+                    (email.replies?.length || 0);
+                }
               }
             }
 
-            // Assign counts and convert 'sent_at' to ISO date if available
+            // Enrich emails with reply counts and other fallbacks
             this.allEmails = emails.map((email) => ({
               ...email,
-              replyCount: email.thread_id ? replyCountMap[email.thread_id] || 0 : 0,
+              replyCount: email.thread_id
+                ? replyCountMap[email.thread_id] || 0
+                : 0,
               subject: email.subject || '',
               preview: email.preview || '',
               sender: email.sender || '',
@@ -71,7 +80,6 @@ export class PrimaryComponent implements OnInit {
               status: email.status || 'unsent',
               time: email.time || '',
               date: email.date || '-',
-              // sent_at: email.sent_at ?? undefined,
             }));
 
             this.totalItemsChanged.emit(this.allEmails.length);
@@ -79,7 +87,15 @@ export class PrimaryComponent implements OnInit {
             this.updateDisplayedEmails();
             this.isLoading = false;
           },
+          error: (err) => {
+            console.error('Failed to fetch threads:', err);
+            this.isLoading = false;
+          },
         });
+      },
+      error: (err) => {
+        console.error('Failed to fetch emails:', err);
+        this.isLoading = false;
       },
     });
   }

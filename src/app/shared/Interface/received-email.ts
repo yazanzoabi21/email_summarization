@@ -10,6 +10,7 @@ export interface ReceivedEmail {
     time?: string;
     received_at: string;
     isRead: boolean;
+    summary: string;
     attachments?: {
         filename: string;
         mimeType: string;

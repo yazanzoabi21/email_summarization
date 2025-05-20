@@ -7,18 +7,19 @@
         {{ error }}
     </div>
 
-    <div *ngIf="!isLoading && emails.length === 0 && !error" class="alert alert-warning text-center">
+    <div *ngIf="!isLoading && emails.length === 0 && !error" class="alert alert-warning text-center mt-3 mx-3">
         No received emails found.
     </div>
 
-    <div *ngIf="!isLoading && !error && emails.length > 0" class="table-responsive">
+    <div *ngIf="!showEmailDetails && !isLoading && !error && emails.length > 0" class="table-responsive">
         <table class="table table-hover email-table align-middle text-center">
             <thead class="thead-light">
                 <tr>
+                    <th scope="col" style="width: 7%">Date</th>
                     <th scope="col" style="width: 10%">From</th>
                     <th scope="col" style="width: 7%">Subject</th>
                     <th scope="col" style="width: 10%">Message</th>
-                    <th scope="col" style="width: 7%">Date</th>
+                    <th scope="col" style="width: 10%">Summarized</th>
                     <th scope="col" style="width: 5%"></th>
                 </tr>
             </thead>
@@ -27,6 +28,15 @@
                     <!-- Primary email row -->
                     <tr [ngClass]="email.isRead ? 'read' : 'unread'" (click)="openEmail(email)"
                         style="cursor: pointer;">
+                        <td>
+                            {{
+                            email.received_at
+                            ? (email.received_at | date : "shortTime") +
+                            " | " +
+                            (email.received_at | date : "shortDate")
+                            : "-"
+                            }}
+                        </td>
                         <td>
                             {{
                             email.from
@@ -55,21 +65,21 @@
                             }}
                         </td>
                         <td>
-                            {{
-                            email.received_at
-                            ? (email.received_at | date : "shortTime") +
-                            " | " +
-                            (email.received_at | date : "shortDate")
-                            : "-"
-                            }}
+                            {{ email.summary ? (email.summary.length > 25 ? (email.summary | slice: 0:25) + '...' :
+                            email.summary) : '-' }}
                         </td>
                         <td>
                             <div class="action-buttons">
+                                <button class="btn-icon btn-modal" (click)="openCustomModal($event, email)">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+
                                 <button class="btn-icon btn-read" (click)="toggleRead(email, $event)">
                                     <i class="fa-solid"
                                         [ngClass]="selectedEmail?.email_id === email.email_id || email.isRead ? 'fa-envelope-open' : 'fa-envelope'">
                                     </i>
                                 </button>
+
                                 <button class="btn-icon btn-delete" (click)="$event.stopPropagation()">
                                     <i class="fa-solid fa-trash-can fs-6"></i>
                                 </button>
@@ -82,13 +92,34 @@
     </div>
 </div>
 
+<!-- Email Detail View -->
+<div *ngIf="showEmailDetails" class="container p-3">
+    <button class="btn btn-outline-success mb-3" (click)="goBackToTable()">
+        <i class="fa fa-arrow-left me-1"></i> Back
+    </button>
+
+    <div class="p-4 rounded shadow-sm ms-4" style="background-color: #f8f9fa;">
+        <h5 class="mb-3"><strong>Subject:</strong> {{ selectedEmail?.subject }}</h5>
+        <p><strong>To:</strong> {{ selectedEmail?.from }}</p>
+        <p><strong>Sent At:</strong> {{ selectedEmail?.time }}</p>
+
+        <p class="mt-3"><strong>Message:</strong></p>
+        <div class="bg-white border rounded p-3" [innerHTML]="selectedEmail?.body || selectedEmail?.snippet"></div>
+
+        <p class="mt-3"><strong>Summarized:</strong></p>
+        <div class="bg-white border rounded p-3" [innerHTML]="selectedEmail?.summary || '-'"></div>
+    </div>
+</div>
+
 <!-- Modal -->
 <div class="modal" tabindex="-1" role="dialog" [ngClass]="{ 'd-block': selectedEmail }"
-    style="background: rgba(0, 0, 0, 0.5)" *ngIf="selectedEmail">
+    style="background: rgba(0, 0, 0, 0.5)" *ngIf="selectedEmail && modalVisible">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header p-2" style="border-bottom: 2px solid #dee2e6">
-                <h5 class="modal-title">Reply to email</h5>
+                <h5 class="modal-title">
+                    Reply to {{ getSenderName(selectedEmail.from || '') }}
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                     (click)="closeModal()"></button>
             </div>
@@ -97,7 +128,9 @@
                 <div class="reply-header mb-3">
                     <div class="d-flex flex-wrap justify-content-between align-items-center">
                         <div class="from-info">
-                            <strong>From:</strong> {{ selectedEmail.from }}
+                            <strong>Subject:</strong> {{ selectedEmail.subject }}
+                            <br>
+                            <strong>From:</strong> {{ getOnlyEmail(selectedEmail.from || '') }}
                         </div>
                         <div class="time-info text-muted">
                             <i class="fa-regular fa-clock me-1"></i> {{ selectedEmail.time }}
@@ -129,22 +162,50 @@
                     </div>
                 </div>
 
-                <!-- Previous Replies -->
-                <div *ngIf="selectedEmail?.replies && selectedEmail.replies.length > 0" class="email-replies mt-2">
+                <div *ngIf="selectedEmail?.replies?.length" class="email-replies mt-2">
                     <h6 class="text-secondary mb-3">Previous Replies</h6>
-                    <div *ngFor="let reply of selectedEmail.replies" class="email-reply-box mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <div>
-                                <strong>{{ reply.sender || "You" }}</strong>
+
+                    <ng-container *ngFor="let reply of selectedEmail.replies">
+                        <div class="reply-thread-box mb-3 ms-2 border-start ps-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div><strong>{{ reply.sender || 'You' }}</strong></div>
+                                <div class="text-muted small">
+                                    <i class="fa-regular fa-clock me-1"></i> {{ reply.time }}
+                                </div>
                             </div>
-                            <div class="text-muted small">
-                                <i class="fa-regular fa-clock me-1"></i> {{ reply.time }}
-                            </div>
+                            <div class="reply-body">{{ reply.body }}</div>
+
+                            <!-- Nested replies (children) -->
+                            <ng-container *ngIf="reply.children?.length">
+                                <ng-container *ngFor="let child of reply.children">
+                                    <div class="reply-thread-box mb-3 ms-4 border-start ps-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <div><strong>{{ child.sender || 'You' }}</strong></div>
+                                            <div class="text-muted small">
+                                                <i class="fa-regular fa-clock me-1"></i> {{ child.time }}
+                                            </div>
+                                        </div>
+                                        <div class="reply-body">{{ child.body }}</div>
+
+                                        <!-- Nested again (level 3) -->
+                                        <ng-container *ngIf="child.children?.length">
+                                            <ng-container *ngFor="let sub of child.children">
+                                                <div class="reply-thread-box mb-3 ms-5 border-start ps-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <div><strong>{{ sub.sender || 'You' }}</strong></div>
+                                                        <div class="text-muted small">
+                                                            <i class="fa-regular fa-clock me-1"></i> {{ sub.time }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="reply-body">{{ sub.body }}</div>
+                                                </div>
+                                            </ng-container>
+                                        </ng-container>
+                                    </div>
+                                </ng-container>
+                            </ng-container>
                         </div>
-                        <div class="reply-body">
-                            {{ reply.body }}
-                        </div>
-                    </div>
+                    </ng-container>
                 </div>
 
                 <hr class="custom-divider" />
@@ -152,19 +213,29 @@
                 <!-- Reply Section -->
                 <div class="reply-section">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <button class="btn btn-outline-primary" (click)="toggleReplyForm()">
-                            <i class="fa-solid fa-reply me-2"></i> Reply
-                        </button>
+                        <div>
+                            <button class="btn btn-outline-primary me-2" (click)="toggleReplyForm()">
+                                <i class="fa-solid fa-reply me-2"></i> Reply
+                            </button>
 
-                        <button class="btn btn-outline-secondary" (click)="toggleSummary()">
+                            <!-- ✅ New Auto-Reply Button -->
+                            <button class="btn btn-outline-success me-2" (click)="triggerAutoReply()">
+                                <i class="fa-solid fa-robot me-2"></i> Auto-Reply
+                            </button>
+                        </div>
+
+                        <button class="btn btn-outline-secondary" (click)="summarizeEmail()">
                             <i class="fa-solid fa-align-left me-2"></i> Summarize
                         </button>
                     </div>
 
                     <div class="row g-3">
-                        <div *ngIf="showReplyForm" [ngClass]="{ 'col-md-12': !showSummary, 'col-md-6': showSummary }">
+                        <div *ngIf="showManualReplyForm || showAutoReplyForm"
+                            [ngClass]="{ 'col-md-6': showSummary, 'col-md-12': !showSummary }">
                             <label class="form-label d-flex align-items-center">
-                                <strong>Reply:</strong>
+                                <strong>
+                                    {{ showManualReplyForm ? 'Reply' : showAutoReplyForm ? 'Auto-Reply' : 'Reply' }}:
+                                </strong>
                             </label>
                             <textarea class="form-control" [ngClass]="{ 'is-invalid': isReplyInvalid }" rows="5"
                                 [(ngModel)]="replyBody" (keyup)="onReplyInputChange()"
@@ -172,15 +243,31 @@
                             </textarea>
                         </div>
 
-                        <div *ngIf="showSummary" [ngClass]="{ 'col-md-12': !showReplyForm, 'col-md-6': showReplyForm }">
-                            <label class="form-label"><strong>Summary:</strong></label>
-                            <textarea class="form-control" rows="5" readonly [value]="summaryText"></textarea>
+                        <div *ngIf="showSummary"
+                            [ngClass]="{ 'col-md-6': showManualReplyForm || showAutoReplyForm, 'col-md-12': !(showManualReplyForm || showAutoReplyForm)}"
+                            class="position-relative">
+
+                            <label class="form-label">
+                                <strong>Summary:</strong>
+                            </label>
+
+                            <button class="btn btn-outline-danger position-absolute top-0 end-0 me-3 px-1 py-0"
+                                style="font-size: 0.7rem; line-height: 1; height: 20px; width: 20px;"
+                                (click)="closeSummary()" type="button" title="Close summary">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+
+                            <textarea class="form-control" rows="5" readonly
+                                [value]="selectedEmail.summaryText || summaryText">
+                            </textarea>
                         </div>
                     </div>
 
-                    <div class="text-end mt-3" *ngIf="showReplyForm">
-                        <button class="btn btn-success" (click)="sendReply()">
-                            <i class="fa-solid fa-paper-plane me-1"></i> Send
+                    <div class="text-end mt-3" *ngIf="showManualReplyForm || showAutoReplyForm">
+                        <button class="btn btn-success" [disabled]="isSending" (click)="sendReply()">
+                            <i class="fa-solid me-1"
+                                [ngClass]="isSending ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+                            {{ isSending ? 'Sending...' : 'Send' }}
                         </button>
                     </div>
                 </div>

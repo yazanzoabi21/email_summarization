@@ -68,7 +68,12 @@
                         [(ngModel)]="body" [class.is-invalid]="composeForm.submitted && (!body || body.trim() === '')">
                     </textarea>
 
-                    <button type="submit" class="btn btn-primary w-25">Send</button>
+                    <button type="submit" class="btn btn-primary w-25" [disabled]="isSending">
+                        <span *ngIf="!isSending">Send</span>
+                        <span *ngIf="isSending" class="spinner-border spinner-border-sm me-2" role="status"
+                            aria-hidden="true"></span>
+                        <span *ngIf="isSending">Sending...</span>
+                    </button>
                 </form>
             </div>
         </div>

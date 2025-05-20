@@ -37,6 +37,32 @@ export class EmailService {
     });
   }
 
+  // summarize email
+  // summarizeEmail(content: string): Observable<{ summary: string }> {
+  //   const token = localStorage.getItem('token');
+  //   const headers = new HttpHeaders({
+  //     'Content-Type': 'application/json',
+  //     Authorization: `Bearer ${token}`,
+  //   });
+
+  //   return this.http.post<{ summary: string }>(environment.apiUrl + 'email/summarize', {content}, {
+  //       headers
+  //     });
+  // }
+
+  summarizeEmail(content: string, email_id: string): Observable<{ summary: string }> {
+  const token = localStorage.getItem('token');
+  const headers = new HttpHeaders({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  });
+
+  return this.http.post<{ summary: string }>(environment.apiUrl + 'email/summarize', {
+    content,
+    email_id
+  }, { headers });
+}
+
   // receive email
   getReceiverEmails(): Observable<ReceivedEmail[]> {
     const token = localStorage.getItem('token');
@@ -51,15 +77,17 @@ export class EmailService {
   }
 
   // add this method to EmailService
-  getEmailsWithReplies(): Observable<any> {
+  getEmailsWithReplies(): Observable<{
+    [thread_id: string]: ReceivedEmailWithReplies[];
+  }> {
     const token = localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     });
 
-    return this.http.get<ReceivedEmailWithReplies[]>(
-      environment.apiUrl + 'email/threads', 
+    return this.http.get<{ [thread_id: string]: ReceivedEmailWithReplies[] }>(
+      `${environment.apiUrl}email/threads`,
       { headers }
     );
   }

@@ -15,11 +15,11 @@
                     <tr>
                         <!-- <th style="width: 5%"></th> -->
                         <th style="width: 2%"></th>
+                        <th style="width: 5%">Date</th>
                         <th style="width: 20%">Details</th>
                         <th style="width: 5%">Subject</th>
                         <!-- <th style="width: 10%">Recipient</th> -->
                         <th style="width: 10%">Message</th>
-                        <th style="width: 5%">Date</th>
                         <th style="width: 5%">Status</th>
                         <th style="width: 2%"></th>
                     </tr>
@@ -36,6 +36,14 @@
                                     </i>
                                 </button>
                             </div>
+                        </td>
+
+                        <td>
+                            {{
+                            email.date && email.time
+                            ? email.time + ' | ' + email.date
+                            : '-'
+                            }}
                         </td>
 
                         <td>
@@ -74,15 +82,6 @@
                         <td class="email-content">
                             {{ email.preview ? (email.preview.length > 25 ? (email.preview | slice : 0 : 25) + "..." :
                             email.preview) : "-" }}
-                        </td>
-
-                        <!-- <td class="email-time">{{ email.time }}</td> -->
-                        <td>
-                            {{
-                            email.date && email.time
-                            ? email.time + ' | ' + email.date
-                            : '-'
-                            }}
                         </td>
 
                         <td>
@@ -146,8 +145,12 @@
         <ng-template #detailView>
             <div class="card shadow-sm p-4">
                 <div class="d-flex align-items-center mb-3">
-                    <button class="btn btn-outline-success btn-sm rounded" (click)="goBackToTable()">
+                    <!-- <button class="btn btn-outline-success btn-sm rounded" (click)="goBackToTable()">
                         <i class="fa fa-arrow-left me-2"></i> Back
+                    </button> -->
+
+                    <button class="btn btn-outline-success mb-3" (click)="goBackToTable()">
+                        <i class="fa fa-arrow-left me-1"></i> Back
                     </button>
                 </div>
 

@@ -7,7 +7,7 @@
       <span *ngIf="!isCollapsed">Send Email</span>
     </button>
 
-    <app-compose #compose></app-compose>
+    <app-compose #compose (emailSent)="handleComposeSent()"></app-compose>
   </div>
 
   <!-- Sidebar Menu -->

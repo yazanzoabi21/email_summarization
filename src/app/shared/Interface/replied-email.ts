@@ -9,4 +9,6 @@ export interface RepliedEmail {
   replied_at: string;
   original_message_id: string;
   time?: string;
+
+  children?: RepliedEmail[];
 }

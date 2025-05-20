@@ -80,4 +80,8 @@ export class AppComponent implements OnInit {
   toggleSidebar(): void {
     this.isCollapsed = !this.isCollapsed;
   }
+
+  handleComposeSent(){
+    if (this.router.url.includes('/inbox')) {}
+  }
 }

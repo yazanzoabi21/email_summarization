@@ -164,27 +164,21 @@
 }
 
 .email-replies {
-    padding: 12px 16px;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    margin-top: 1rem;
 
-    .email-reply-box {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
+    .reply-thread-box {
+        background-color: #f8f9fa; // Light background
+        padding: 0.75rem 1rem;
         border-radius: 8px;
-        padding: 10px 14px;
-        font-size: 0.95rem;
-        color: #334155;
+        margin-bottom: 0.75rem; // Space between replies
 
         .reply-body {
-            margin-top: 4px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            margin-top: 0.25rem;
         }
 
-        &:not(:last-child) {
-            margin-bottom: 8px;
+        strong {
+            display: inline-block;
+            margin-bottom: 0.25rem;
         }
     }
 }
@@ -242,4 +236,18 @@
 .is-invalid {
     border: 1px solid #dc3545 !important;
     box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
+}
+
+.email-detail-wrapper {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 24px;
+
+    .email-section {
+        background-color: white;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
 }

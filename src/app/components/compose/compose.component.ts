@@ -3,6 +3,7 @@ import { ToastService } from './../../shared/services/toast.service';
 import { EmailService } from '../../shared/services/email.service';
 import { EmailEventsService } from './../../shared/services/email-events.service';
 import { Email } from '../../shared/Interface/email';
+import { Router } from '@angular/router';
 
 declare var bootstrap: any;
 
@@ -21,6 +22,7 @@ export class ComposeComponent {
   bcc: string = '';
   subject: string = '';
   body: string = '';
+  isSending: boolean = false;
 
   showCc = false;
   showBcc = false;
@@ -35,7 +37,9 @@ export class ComposeComponent {
   constructor(
     private toastService: ToastService,
     private emailService: EmailService,
-    private emailEventsService: EmailEventsService) {}
+    private emailEventsService: EmailEventsService,
+    private router: Router
+  ) {}
 
   openModal() {
     setTimeout(() => {
@@ -50,57 +54,62 @@ export class ComposeComponent {
   }
 
   onSubmit(form: any): void {
-    this.forceToValidation = true;
-    Object.values(form.controls).forEach((control: any) => control.markAsTouched());
-  
-    const isToValid = this.recipient && this.isValidEmail(this.recipient);
-    const isCcValid = !this.showCc || (this.cc && this.isValidEmail(this.cc));
-    const isBccValid = !this.showBcc ? true : (this.bcc && this.isValidEmail(this.bcc));
-    const isSubjectValid = this.subject && this.subject.trim() !== '';
-    const isBodyValid = this.body && this.body.trim() !== '';
-  
-    if (!isToValid || !isCcValid || !isBccValid || !isSubjectValid || !isBodyValid) {
-      this.toastService.show('Please complete all required fields correctly.', 'error');
-      return;
+  this.forceToValidation = true;
+  Object.values(form.controls).forEach((control: any) => control.markAsTouched());
+
+  const isToValid = this.recipient && this.isValidEmail(this.recipient);
+  const isCcValid = !this.showCc || (this.cc && this.isValidEmail(this.cc));
+  const isBccValid = !this.showBcc || (this.bcc && this.isValidEmail(this.bcc));
+  const isSubjectValid = this.subject && this.subject.trim() !== '';
+  const isBodyValid = this.body && this.body.trim() !== '';
+
+  if (!isToValid || !isCcValid || !isBccValid || !isSubjectValid || !isBodyValid) {
+    this.toastService.show('Please complete all required fields correctly.', 'error');
+    return;
+  }
+
+  this.isSending = true;
+
+  const pendingEmail: Email = {
+    id: Date.now(),
+    sender: 'You',
+    sender_email: 'zohbiyazan@gmail.com',
+    recipient: this.recipient,
+    recipient_email: this.recipient,
+    subject: this.subject,
+    preview: this.body.slice(0, 100),
+    cc: this.cc,
+    bcc: this.bcc,
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    status: 'pending',
+    isRead: false,
+    isStarred: false,
+    body: this.body,
+  };
+
+  this.emailEventsService.emitPendingEmail(pendingEmail);
+
+  // ✅ Close the modal & emit event immediately (before sending)
+  this.modalInstance?.hide();
+  this.emailSent.emit();
+
+  // ✅ Continue sending in the background
+  this.emailService.sendEmail(pendingEmail).subscribe({
+    next: () => {
+      this.toastService.show('Email sent successfully!', 'success');
+      this.emailEventsService.emitEmailSent();
+    },
+    error: (error) => {
+      this.toastService.show('Failed to send email. Please try again.', 'error');
+      console.error(error);
+    },
+    complete: () => {
+      this.isSending = false;
+      form.resetForm();
+      this.resetForm();
     }
-  
-    // ✅ 1. Create a pending email immediately
-    const pendingEmail: Email = {
-      id: Date.now(),
-      sender: 'You', // or your own email/name if known
-      sender_email: 'zohbiyazan@gmail.com', // optionally set this dynamically if logged-in user is available
-      recipient: this.recipient,
-      recipient_email: this.recipient,
-      subject: this.subject,
-      preview: this.body.slice(0, 100),
-      cc: this.cc,
-      bcc: this.bcc,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      status: 'pending',
-      isRead: false,
-      isStarred: false,
-      body: this.body,
-    };
-  
-    this.emailEventsService.emitPendingEmail(pendingEmail);
-  
-    // ✅ 2. Now send the real email
-    this.emailService.sendEmail(pendingEmail).subscribe({
-      next: (response) => {
-        this.toastService.show('Email sent successfully!', 'success');
-        this.emailEventsService.emitEmailSent(); // ✅ Full reload after success
-        setTimeout(() => {
-          this.modalInstance?.hide();
-        }, 500);
-        form.resetForm();
-        this.resetForm();
-      },
-      error: (error) => {
-        this.toastService.show('Failed to send email. Please try again.', 'error');
-        console.error(error);
-      }
-    });
-  }  
+  });
+}
 
   resetForm() {
     this.recipient = '';

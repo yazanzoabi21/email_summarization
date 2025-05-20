@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 export class SidebarComponent {
   @ViewChild('compose') composeComponent!: any;
   @Input() isCollapsed: boolean= false;
+  @Output() composeSent = new EventEmitter<void>();
 
   constructor() {}
 
@@ -18,5 +19,9 @@ export class SidebarComponent {
 
   openComposeModal() {
     this.composeComponent.openModal();
+  }
+
+  handleComposeSent() {
+    this.composeSent.emit(); // 🔁 Forward to InboxComponent
   }
 }

@@ -4,6 +4,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { EmailService } from '../../../shared/services/email.service';
 import { PrimaryComponent } from '../../informations/primary/primary.component';
 import { ReceiveComponent } from '../../informations/receive/receive.component';
+import { EmailEventsService } from '../../../shared/services/email-events.service';
 
 @Component({
   selector: 'app-inbox',
@@ -25,6 +26,7 @@ import { ReceiveComponent } from '../../informations/receive/receive.component';
 export class InboxComponent implements OnInit {
   @ViewChild(PrimaryComponent) primaryComponent!: PrimaryComponent;
   @ViewChild(ReceiveComponent) receiveComponent!: ReceiveComponent;
+  @ViewChild('composeComponent') composeComponent!: any;
 
   activeTab = 'composed';
   selectedEmailsExist = false;
@@ -42,10 +44,15 @@ export class InboxComponent implements OnInit {
 
   paginationLoading = false;
 
-  constructor(private emailService: EmailService) {}
+  constructor(private emailService: EmailService,
+  private emailEventsService: EmailEventsService) {}
 
   ngOnInit(): void {
     this.loadEmails();
+
+    this.emailEventsService.emailSent$.subscribe(() => {
+    this.handleComposeSent(); // ✅ Switch to composed tab and refresh
+  });
   }
 
   loadEmails() {
@@ -59,6 +66,17 @@ export class InboxComponent implements OnInit {
         console.error('Error fetching emails:', error);
       }
     });
+  }
+
+  handleComposeSent() {
+    this.activeTab = 'composed';
+    this.primaryComponent?.refresh();
+    this.selectedEmail = null;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  openComposeModal() {
+    this.composeComponent.openModal();
   }
 
   updateDisplayedEmails() {

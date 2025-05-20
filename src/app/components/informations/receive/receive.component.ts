@@ -34,6 +34,13 @@ export class ReceiveComponent implements OnInit {
   summaryText: string = '';
 
   isReplyInvalid: boolean = false;
+  isSending: boolean = false;
+
+  showManualReplyForm: boolean = false;
+  showAutoReplyForm: boolean = false;
+
+  showEmailDetails: boolean = false;
+  modalVisible: boolean = false;
 
   constructor(
     private emailService: EmailService,
@@ -48,48 +55,94 @@ export class ReceiveComponent implements OnInit {
   fetchReceiveEmails(): void {
     this.isLoading = true;
 
-    this.emailService.getReceiverEmails().subscribe((receivedEmails) => {
-      this.emailService.getEmailsWithReplies().subscribe({
-        next: (emailsWithReplies: ReceivedEmailWithReplies[]) => {
-          this.allEmails = emailsWithReplies
-            .sort(
-              (a, b) =>
-                new Date(b.received_at).getTime() -
-                new Date(a.received_at).getTime()
-            )
-            .map((email) => ({
-              ...email,
-              body: email.body ? this.cleanHtml(email.body) : '',
-              time: email.received_at
-                ? new Date(email.received_at).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : '-',
-              replies: (email.replies ?? [])
-                .sort(
-                  (a, b) =>
-                    new Date(a.replied_at).getTime() -
-                    new Date(b.replied_at).getTime()
-                )
-                .map((reply) => ({
-                  ...reply,
-                  time: reply.replied_at
-                    ? new Date(reply.replied_at).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })
-                    : '-',
-                })),
-            }));
+    // Step 1: Get base receiver emails (can be used later if needed)
+    this.emailService.getReceiverEmails().subscribe({
+      next: () => {
+        // Step 2: Get grouped emails with replies
+        this.emailService.getEmailsWithReplies().subscribe({
+          next: (threadedEmails: {
+            [threadId: string]: ReceivedEmailWithReplies[];
+          }) => {
+            this.allEmails = Object.values(threadedEmails)
+              .flat()
+              .sort(
+                (a, b) =>
+                  new Date(b.received_at).getTime() -
+                  new Date(a.received_at).getTime()
+              )
+              .map((email) => ({
+                ...email,
+                body: email.body ? this.cleanHtml(email.body) : '',
+                time: email.received_at
+                  ? new Date(email.received_at).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : '-',
+                summaryText: email.summary || '',
+                replies: this.buildReplyTree(
+                  this.deduplicateReplies(email.replies ?? []).map((reply) => ({
+                    ...reply,
+                    time: reply.replied_at
+                      ? new Date(reply.replied_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : '-',
+                  }))
+                ),
+              }));
 
-          this.totalItemsChanged.emit(this.allEmails.length);
-          this.loadingFinished.emit();
-          this.updateDisplayedEmails();
-          this.isLoading = false;
-        },
-      });
+            this.totalItemsChanged.emit(this.allEmails.length);
+            this.loadingFinished.emit();
+            this.updateDisplayedEmails();
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('❌ Failed to load replies:', err);
+            this.toastService.show('Failed to load email replies.', 'error');
+            this.isLoading = false;
+          },
+        });
+      },
+      error: (err) => {
+        console.error('❌ Failed to load received emails:', err);
+        this.toastService.show('Failed to load received emails.', 'error');
+        this.isLoading = false;
+      },
     });
+  }
+
+  deduplicateReplies(replies: any[]): any[] {
+    const seen = new Set<string>();
+    return replies.filter((reply) => {
+      const key = `${reply.body}-${reply.replied_at}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  buildReplyTree(replies: any[]): any[] {
+    const replyMap = new Map<string, any>();
+    const rootReplies: any[] = [];
+
+    replies.forEach((reply) => {
+      reply.children = [];
+      replyMap.set(reply.id || reply.replied_at, reply);
+    });
+
+    replies.forEach((reply) => {
+      const parentId = reply.parent_message_id;
+      const parent = replyMap.get(parentId);
+      if (parent) {
+        parent.children.push(reply);
+      } else {
+        rootReplies.push(reply); // top-level reply
+      }
+    });
+
+    return rootReplies;
   }
 
   cleanHtml(raw: string): string {
@@ -121,10 +174,15 @@ export class ReceiveComponent implements OnInit {
   }
 
   openEmail(email: ReceivedEmailWithReplies) {
-    this.selectedEmail = email;
+    this.selectedEmail = {
+      ...email,
+      replies: this.buildReplyTree(
+        this.deduplicateReplies(email.replies ?? [])
+      ),
+    };
     this.showReplyForm = false;
-
-    console.log('📩 Email body content:', email.body);
+    this.showEmailDetails = true;
+    this.modalVisible = false;
 
     if (!email.isRead && email.email_id) {
       this.emailService
@@ -135,6 +193,8 @@ export class ReceiveComponent implements OnInit {
           },
         });
     }
+
+    this.showEmailDetails = true;
   }
 
   sendReply() {
@@ -145,77 +205,105 @@ export class ReceiveComponent implements OnInit {
     }
 
     this.isReplyInvalid = false;
+    this.isSending = true;
 
-    if (this.selectedEmail) {
-      const replyPayload = {
-        recipient: this.extractEmailAddress(this.selectedEmail.from),
-        subject: `Re: ${this.selectedEmail.subject}`,
-        body: this.replyBody,
-        thread_id: this.selectedEmail.thread_id,
-        message_id: this.selectedEmail.message_id,
-      };
+    if (!this.selectedEmail) return;
 
-      this.emailService.replyToEmail(replyPayload).subscribe({
-        next: (response) => {
-          const newReply = {
-            id: response.message_id || Date.now(),
-            sender: 'You',
-            recipient: replyPayload.recipient,
-            subject: replyPayload.subject,
-            body: replyPayload.body,
-            replied_at: new Date().toISOString(),
-            time: new Date().toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-            original_message_id: this.selectedEmail?.message_id || '',
-          };
+    const replyPayload = {
+      recipient: this.extractEmailAddress(this.selectedEmail.from),
+      subject: `Re: ${this.selectedEmail.subject}`,
+      body: this.replyBody,
+      thread_id: this.selectedEmail.thread_id,
+      message_id: this.selectedEmail.message_id,
+      parent_message_id: this.selectedEmail.message_id,
+    };
 
-          if (!this.selectedEmail!.replies) {
-            this.selectedEmail!.replies = [];
-          }
-          this.selectedEmail!.replies.push(newReply);
+    this.emailService.replyToEmail(replyPayload).subscribe({
+      next: (response) => {
+        const newReply = {
+          id: response.message_id || Date.now(),
+          sender: 'You',
+          recipient: replyPayload.recipient,
+          subject: replyPayload.subject,
+          body: replyPayload.body,
+          replied_at: new Date().toISOString(),
+          time: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+          original_message_id: this.selectedEmail?.message_id || '',
+        };
 
-          this.selectedEmail!.replies.sort((a, b) => {
-            return (
-              new Date(a.replied_at).getTime() -
-              new Date(b.replied_at).getTime()
-            );
-          });
+        this.selectedEmail!.replies = this.selectedEmail!.replies || [];
+        this.selectedEmail!.replies.push(newReply);
+        this.selectedEmail!.replies.sort(
+          (a, b) =>
+            new Date(a.replied_at).getTime() - new Date(b.replied_at).getTime()
+        );
 
-          if (this.selectedEmail!.email_id) {
-            this.emailService
-              .markReceivedEmailAsRead(this.selectedEmail!.email_id, true)
-              .subscribe({
-                next: () => {
-                  this.selectedEmail!.isRead = true;
-                  const emailInList = this.emails.find(
-                    (e) => e.email_id === this.selectedEmail!.email_id
-                  );
-                  if (emailInList) {
-                    emailInList.isRead = true;
-                  }
-                },
-              });
-          }
+        if (this.selectedEmail!.email_id) {
+          this.emailService
+            .markReceivedEmailAsRead(this.selectedEmail!.email_id, true)
+            .subscribe({
+              next: () => {
+                this.selectedEmail!.isRead = true;
+                const emailInList = this.emails.find(
+                  (e) => e.email_id === this.selectedEmail!.email_id
+                );
+                if (emailInList) emailInList.isRead = true;
+              },
+            });
+        }
 
-          this.sentService.addSentEmail({
-            recipient: replyPayload.recipient,
-            subject: replyPayload.subject,
-            body: replyPayload.body,
-            time: new Date().toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-          });
+        this.sentService.addSentEmail({
+          recipient: replyPayload.recipient,
+          subject: replyPayload.subject,
+          body: replyPayload.body,
+          time: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        });
 
-          this.fetchReceiveEmails();
-          this.toastService.show('Reply sent successfully!', 'success');
-          this.closeModal();
-          this.replyBody = '';
-        },
-      });
+        this.fetchReceiveEmails();
+
+        // ✅ Close the modal only after success
+        this.closeModal();
+
+        // ✅ Then show toast
+        this.toastService.show('Reply sent successfully!', 'success');
+      },
+      error: () => {
+        this.toastService.show('Failed to send reply.', 'error');
+      },
+      complete: () => {
+        this.isSending = false;
+        this.replyBody = '';
+      },
+    });
+  }
+
+  triggerAutoReply(): void {
+    this.showAutoReplyForm = !this.showAutoReplyForm;
+    this.showManualReplyForm = false;
+
+    if (this.showAutoReplyForm) {
+      const content =
+        this.selectedEmail?.body || this.selectedEmail?.snippet || '';
+      const plainText = content.replace(/<[^>]+>/g, '');
+      const words = plainText.split(' ');
+
+      this.replyBody =
+        words.length > 10
+          ? `Thanks for your message about "${words
+              .slice(0, 10)
+              .join(' ')}..." — I'll get back to you soon.`
+          : `Thanks for your message — I'll get back to you shortly.`;
+    } else {
+      this.replyBody = '';
     }
+
+    this.isReplyInvalid = false;
   }
 
   extractEmailAddress(fullFrom: string): string {
@@ -226,11 +314,15 @@ export class ReceiveComponent implements OnInit {
   closeModal() {
     this.selectedEmail = null;
     this.resetReplyForm();
+    this.showManualReplyForm = false;
+    this.showAutoReplyForm = false;
   }
 
   resetReplyForm(): void {
     this.replyBody = '';
     this.showReplyForm = false;
+    this.showManualReplyForm = false;
+    this.showAutoReplyForm = false;
     this.showSummary = false;
     this.summaryText = '';
     this.isReplyInvalid = false;
@@ -263,37 +355,123 @@ export class ReceiveComponent implements OnInit {
     }
   }
 
-  summarizeEmail() {
-    this.showSummary = true;
+  summarizeEmail(): void {
     this.showReplyForm = false;
 
+    // If summary is visible, resummarize
+    if (this.showSummary) {
+      this.generateSummary(); // re-generate summary if already open
+    } else {
+      this.showSummary = true;
+      this.generateSummary(); // generate initially
+    }
+  }
+
+  generateSummary(): void {
     const content =
       this.selectedEmail?.body || this.selectedEmail?.snippet || '';
     const plainText = content.replace(/<[^>]+>/g, '');
-    const words = plainText.split(' ');
-    this.summaryText =
-      words.length > 20 ? words.slice(0, 20).join(' ') + '...' : plainText;
+    this.summaryText = 'Summarizing...';
+
+    this.emailService
+      .summarizeEmail(plainText, this.selectedEmail!.email_id)
+      .subscribe({
+        next: (res) => {
+          this.summaryText = res.summary;
+
+          // ✅ Update UI state
+          if (this.selectedEmail) {
+            this.selectedEmail.summary = res.summary;
+            this.selectedEmail.summaryText = res.summary; // <-- ✅ Add this line
+
+            const emailInList = this.emails.find(
+              (e) => e.email_id === this.selectedEmail?.email_id
+            );
+            if (emailInList) {
+              emailInList.summary = res.summary;
+              emailInList.summaryText = res.summary; // <-- ✅ Add this too for full UI consistency
+            }
+          }
+        },
+        error: (err) => {
+          this.toastService.show('Failed to summarize email.', 'error');
+          this.summaryText = 'Summary could not be generated.';
+        },
+      });
   }
 
-  toggleReplyForm() {
-    this.showReplyForm = !this.showReplyForm;
+  closeSummary(): void {
+    this.showSummary = false;
+    this.summaryText = '';
   }
 
-  toggleSummary() {
-    if (!this.showSummary) {
-      const content =
-        this.selectedEmail?.body || this.selectedEmail?.snippet || '';
-      const plainText = content.replace(/<[^>]+>/g, '');
-      const words = plainText.split(' ');
-      this.summaryText =
-        words.length > 20 ? words.slice(0, 20).join(' ') + '...' : plainText;
+  getSenderName(from: string): string {
+    const match = from.match(/^(.*?)</);
+    return match ? match[1].trim() : from;
+  }
+
+  getOnlyEmail(from: string): string {
+    const match = from.match(/<(.*?)>/);
+    return match ? `<${match[1].trim()}>` : from;
+  }
+
+  toggleReplyForm(): void {
+    this.showManualReplyForm = !this.showManualReplyForm;
+    this.showAutoReplyForm = false;
+
+    if (this.showManualReplyForm) {
+      this.replyBody = '';
+    } else {
+      this.replyBody = '';
     }
-    this.showSummary = !this.showSummary;
+
+    this.isReplyInvalid = false;
   }
 
   onReplyInputChange() {
     if (this.replyBody.trim().length > 0) {
       this.isReplyInvalid = false;
     }
+  }
+
+  toggleDetail(email: ReceivedEmailWithReplies) {
+    this.selectedEmail = email;
+    this.showEmailDetails = true;
+  }
+
+  goBackToTable() {
+    this.showEmailDetails = false;
+    this.selectedEmail = null;
+    this.modalVisible = false;
+  }
+
+  openCustomModal(event: MouseEvent, email: ReceivedEmailWithReplies) {
+    event.stopPropagation();
+    this.selectedEmail = {
+      ...email,
+      replies: this.buildReplyTree(
+        this.deduplicateReplies(email.replies ?? [])
+      ),
+    };
+
+    this.modalVisible = true;
+
+    // ✅ Check if email already has summary
+    if (email.summary) {
+      this.showSummary = true;
+      this.summaryText = email.summary;
+    } else {
+      this.showSummary = false;
+      this.summaryText = '';
+    }
+
+    // Reset reply states
+    this.showReplyForm = false;
+    this.showManualReplyForm = false;
+    this.showAutoReplyForm = false;
+  }
+
+  closeCustomModal() {
+    this.modalVisible = false;
   }
 }
